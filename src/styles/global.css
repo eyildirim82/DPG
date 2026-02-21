@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #051424;
+  --color-bg-light: #0A2239;
+  --color-gold: #E6C275;
+  --color-gold-dim: #9E8245;
+  --color-silver: #C4CCD4;
+  --color-text: #F0F4F8;
+  --color-text-muted: #8B9BB4;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--color-bg);
+  overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold-dim);
+}
+
+select option {
+  background: var(--color-bg);
+  color: var(--color-text);
+}

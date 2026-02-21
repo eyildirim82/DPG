@@ -1,0 +1,62 @@
+import { z } from 'zod';
+
+/** Türkiye TC Kimlik No doğrulama (11 hane, resmi algoritma) */
+export function isValidTCKimlikNo(val) {
+  if (!val || typeof val !== 'string') return false;
+  const digits = val.replace(/\D/g, '');
+  if (digits.length !== 11) return false;
+  if (digits[0] === '0') return false;
+  const d = digits.split('').map(Number);
+  const sum13579 = d[0] + d[2] + d[4] + d[6] + d[8];
+  const sum2468 = d[1] + d[3] + d[5] + d[7];
+  const digit10 = (sum13579 * 7 - sum2468) % 10;
+  if (digit10 < 0) return false;
+  if (d[9] !== digit10) return false;
+  const digit11 = (d.slice(0, 10).reduce((a, b) => a + b, 0)) % 10;
+  if (d[10] !== digit11) return false;
+  return true;
+}
+
+const tcNoSchema = z
+  .string()
+  .min(1, 'TC Kimlik No zorunludur.')
+  .refine(
+    (val) => /^\d{11}$/.test((val || '').replace(/\s/g, '')),
+    'TC Kimlik No 11 rakamdan oluşmalıdır.'
+  )
+  .refine((val) => isValidTCKimlikNo(val), 'Geçerli bir TC Kimlik No giriniz.');
+
+const fullNameMinWords = (val) => {
+  if (!val || typeof val !== 'string') return false;
+  const trimmed = val.trim();
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  return words.length >= 2;
+};
+
+export const applicationFormSchema = z
+  .object({
+    tcNo: tcNoSchema,
+    name: z
+      .string()
+      .min(1, 'Ad Soyad zorunludur.')
+      .refine(fullNameMinWords, 'Lütfen en az ad ve soyad giriniz.'),
+    airline: z.string().min(1, 'Havayolu şirketi zorunludur.'),
+    email: z.string().min(1, 'E-posta zorunludur.').email('Geçerli bir e-posta adresi giriniz.'),
+    phone: z
+      .string()
+      .min(1, 'Telefon numarası zorunludur.')
+      .refine(
+        (val) => (val && val.replace(/\D/g, '').length >= 10) || false,
+        'Geçerli bir telefon numarası giriniz (en az 10 hane).'
+      ),
+    participation: z.enum(['physical', 'online'], {
+      required_error: 'Katılım tipi seçiniz.',
+      invalid_type_error: 'Katılım tipi seçiniz.',
+    }),
+    kvkk: z.literal(true, {
+      errorMap: () => ({ message: 'KVKK metnini kabul etmeniz gerekmektedir.' }),
+    }),
+  })
+  .required();
+
+export { tcNoSchema };
