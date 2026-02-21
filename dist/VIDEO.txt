@@ -1,4 +1,0 @@
-Tanıtım videosu için:
-  "WhatsApp Video 2026-02-17 at 10.34.38.mp4" dosyasını bu klasöre kopyalayıp
-  promo.mp4 olarak yeniden adlandırın.
-  Sayfada Hero bölümünden hemen sonra "Tanıtım" bölümünde oynatılacaktır.
