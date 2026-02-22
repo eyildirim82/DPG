@@ -45,7 +45,7 @@ export default function Hero({ onScrollTo }) {
 
   return (
     <motion.section
-      className="min-h-screen flex flex-col justify-center items-center text-center relative pt-20 md:pt-16 px-4"
+      className="min-h-[80vh] md:min-h-screen flex flex-col justify-center items-center text-center relative pt-12 md:pt-16 px-4"
       style={{ isolation: 'isolate' }}
       initial="hidden"
       animate="visible"
@@ -64,13 +64,13 @@ export default function Hero({ onScrollTo }) {
       />
       <motion.div
         variants={item}
-        className="text-base md:text-xl tracking-[0.2em] text-dpg-silver mb-6 md:mb-8 uppercase font-body font-light"
+        className="text-sm md:text-xl tracking-[0.2em] text-dpg-silver mt-4 md:mt-24 mb-2 md:mb-8 uppercase font-body font-light"
       >
-        26 Nisan 2026
+        26 Nisan
       </motion.div>
       <motion.h1
         variants={item}
-        className="font-heading font-normal tracking-wide uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-none mb-6 md:mb-8 text-center"
+        className="font-heading font-normal tracking-wide uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-none mb-4 md:mb-8 text-center"
         style={{
           background: 'linear-gradient(to bottom, #E6C275, #9E8245)',
           WebkitBackgroundClip: 'text',
@@ -82,7 +82,7 @@ export default function Hero({ onScrollTo }) {
       </motion.h1>
       <motion.div
         variants={item}
-        className="w-full max-w-[1100px] mx-auto mb-8 md:mb-10 flex flex-col gap-6"
+        className="w-full max-w-[1100px] mx-auto mb-4 md:mb-10 flex flex-col gap-4 md:gap-6"
       >
         <div className="relative rounded overflow-hidden border border-dpg-gold-dim flex items-center justify-center w-full aspect-video max-h-[320px] sm:max-h-[380px] md:max-h-[420px] bg-dpg-navy"
         >
@@ -143,7 +143,7 @@ export default function Hero({ onScrollTo }) {
       </motion.div>
       <motion.div
         variants={item}
-        className="mt-12 md:mt-16 opacity-90 text-xs md:text-sm tracking-widest text-dpg-silver flex flex-col items-center gap-3"
+        className="mt-8 md:mt-16 opacity-90 text-[10px] md:text-sm tracking-widest text-dpg-silver flex flex-col items-center gap-2 md:gap-3"
       >
         ANA SPONSOR
         <img

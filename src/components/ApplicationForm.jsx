@@ -145,188 +145,186 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           </Button>
         </form>
       ) : (
-      <form onSubmit={handleSubmit(onValid, onInvalid)} noValidate>
-        <div className="mb-6 py-3 px-4 rounded border border-dpg-gold/30 bg-dpg-gold/5 text-dpg-text-muted text-sm font-body flex justify-between items-center">
-          <span>TC Kimlik No: {(watch('tcNo') || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$2**$3*$4')}</span>
-          <button
-            type="button"
-            onClick={() => { setStep(1); setTcInput(''); setValue('tcNo', ''); }}
-            className="text-dpg-gold text-xs underline hover:no-underline"
-          >
-            Değiştir
-          </button>
-        </div>
-        <div ref={errors.name ? firstErrorRef : null} data-field-error={!!errors.name}>
-          <Controller
-            name="name"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <FormInput
-                type="text"
-                placeholder=" "
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                focused={undefined}
-                label="Ad Soyad"
-                error={error?.message}
-              />
-            )}
-          />
-        </div>
-
-        <div data-field-error={!!errors.airline}>
-          <Controller
-            name="airline"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <FormInput
-                type="text"
-                placeholder=" "
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                focused={undefined}
-                label="Havayolu Şirketi"
-                error={error?.message}
-              />
-            )}
-          />
-        </div>
-
-        <div data-field-error={!!errors.email}>
-          <Controller
-            name="email"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <FormInput
-                type="email"
-                placeholder=" "
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                focused={undefined}
-                label="E-Posta Adresi"
-                error={error?.message}
-              />
-            )}
-          />
-        </div>
-
-        <div data-field-error={!!errors.phone}>
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <FormInput
-                type="tel"
-                placeholder=" "
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                focused={undefined}
-                label="Telefon Numarası"
-                error={error?.message}
-              />
-            )}
-          />
-        </div>
-
-        <div className="mb-10 relative" data-field-error={!!errors.participation}>
-          <Controller
-            name="participation"
-            control={control}
-            render={({ field }) => (
-              <>
-                <select
+        <form onSubmit={handleSubmit(onValid, onInvalid)} noValidate>
+          <div className="mb-6 py-3 px-4 rounded border border-dpg-gold/30 bg-dpg-gold/5 text-dpg-text-muted text-sm font-body flex justify-between items-center">
+            <span>TC Kimlik No: {(watch('tcNo') || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$2**$3*$4')}</span>
+            <button
+              type="button"
+              onClick={() => { setStep(1); setTcInput(''); setValue('tcNo', ''); }}
+              className="text-dpg-gold text-xs underline hover:no-underline"
+            >
+              Değiştir
+            </button>
+          </div>
+          <div ref={errors.name ? firstErrorRef : null} data-field-error={!!errors.name}>
+            <Controller
+              name="name"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormInput
+                  type="text"
+                  placeholder=" "
                   value={field.value}
-                  onChange={(e) => field.onChange(e.target.value)}
+                  onChange={field.onChange}
                   onBlur={field.onBlur}
-                  className="w-full bg-transparent border-0 border-b py-4 text-dpg-text font-heading text-base md:text-2xl outline-none transition-colors duration-300 appearance-none cursor-pointer min-h-[44px]"
-                  style={{
-                    color: participation ? theme.colors.text : theme.colors.textMuted,
-                    borderBottomColor: errors.participation
-                      ? '#b91c1c'
-                      : participation
-                        ? theme.colors.gold
-                        : 'rgba(255,255,255,0.2)',
-                    borderBottomWidth: '1px',
-                    borderBottomStyle: 'solid',
-                  }}
-                >
-                  <option value="">Katılım Tipi Seçiniz</option>
-                  <option value="physical">Fiziksel Katılım (İstanbul)</option>
-                  <option value="online">Online Katılım</option>
-                </select>
-                {errors.participation && (
-                  <p className="absolute -bottom-5 left-0 text-xs text-red-500 font-body">
-                    {errors.participation.message}
-                  </p>
-                )}
-              </>
-            )}
-          />
-        </div>
+                  focused={undefined}
+                  label="Ad Soyad"
+                  error={error?.message}
+                />
+              )}
+            />
+          </div>
 
-        {/* KVKK – vurgulu */}
-        <div
-          className="flex items-start gap-4 mb-12 p-4 rounded border"
-          style={{
-            borderColor: kvkk ? 'rgba(230, 194, 117, 0.5)' : 'rgba(230, 194, 117, 0.3)',
-            backgroundColor: 'rgba(230, 194, 117, 0.04)',
-          }}
-          data-field-error={!!errors.kvkk}
-        >
-          <Controller
-            name="kvkk"
-            control={control}
-            render={({ field }) => (
-              <>
-                <label className="flex items-start cursor-pointer flex-1">
-                  <input
-                    type="checkbox"
-                    checked={field.value}
-                    onChange={(e) => field.onChange(e.target.checked)}
+          <div data-field-error={!!errors.airline}>
+            <Controller
+              name="airline"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormInput
+                  type="text"
+                  placeholder=" "
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  focused={undefined}
+                  label="Havayolu Şirketi"
+                  error={error?.message}
+                />
+              )}
+            />
+          </div>
+
+          <div data-field-error={!!errors.email}>
+            <Controller
+              name="email"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormInput
+                  type="email"
+                  placeholder=" "
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  focused={undefined}
+                  label="E-Posta Adresi"
+                  error={error?.message}
+                />
+              )}
+            />
+          </div>
+
+          <div data-field-error={!!errors.phone}>
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormInput
+                  type="tel"
+                  placeholder=" "
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  focused={undefined}
+                  label="Telefon Numarası"
+                  error={error?.message}
+                />
+              )}
+            />
+          </div>
+
+          <div className="mb-10 relative" data-field-error={!!errors.participation}>
+            <Controller
+              name="participation"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <select
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
                     onBlur={field.onBlur}
-                    className="sr-only"
-                  />
-                  <span
-                    role="checkbox"
-                    tabIndex={0}
-                    onClick={() => field.onChange(!field.value)}
-                    onKeyDown={(e) =>
-                      e.key === 'Enter' && field.onChange(!field.value)
-                    }
-                    className="w-5 h-5 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
-                    aria-checked={field.value}
-                  >
-                    {field.value && (
-                      <span className="w-2.5 h-2.5 bg-dpg-gold block" />
-                    )}
-                  </span>
-                  <span
-                    className="ml-4 text-sm font-body font-medium"
+                    className="w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-md px-4 py-4 text-dpg-text font-heading text-base md:text-xl outline-none transition-colors duration-300 appearance-none cursor-pointer min-h-[56px]"
                     style={{
-                      color: errors.kvkk ? '#b91c1c' : theme.colors.textMuted,
+                      color: participation ? theme.colors.text : theme.colors.textMuted,
+                      borderColor: errors.participation
+                        ? '#b91c1c'
+                        : participation
+                          ? theme.colors.gold
+                          : undefined,
                     }}
                   >
-                    KVKK kapsamında kişisel verilerimin işlenmesini kabul ediyorum.
-                  </span>
-                </label>
-                {errors.kvkk && (
-                  <p className="text-xs text-red-500 font-body mt-1 ml-9">
-                    {errors.kvkk.message}
-                  </p>
-                )}
-              </>
-            )}
-          />
-        </div>
+                    <option value="">Katılım Tipi Seçiniz</option>
+                    <option value="physical">Fiziksel Katılım (İstanbul)</option>
+                    <option value="online">Online Katılım</option>
+                  </select>
+                  {errors.participation && (
+                    <p className="absolute -bottom-5 left-0 text-xs text-red-500 font-body">
+                      {errors.participation.message}
+                    </p>
+                  )}
+                </>
+              )}
+            />
+          </div>
 
-        <Button type="submit" className="w-full" style={{ opacity: submitting ? 0.7 : 1 }}>
-          {submitting ? 'İşleniyor...' : 'Katılımımı Onayla'}
-        </Button>
-      </form>
+          {/* KVKK – vurgulu */}
+          <div
+            className="flex items-start gap-4 mb-12 p-4 rounded border"
+            style={{
+              borderColor: kvkk ? 'rgba(230, 194, 117, 0.5)' : 'rgba(230, 194, 117, 0.3)',
+              backgroundColor: 'rgba(230, 194, 117, 0.04)',
+            }}
+            data-field-error={!!errors.kvkk}
+          >
+            <Controller
+              name="kvkk"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <label className="flex items-start cursor-pointer flex-1">
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      onBlur={field.onBlur}
+                      className="sr-only"
+                    />
+                    <span
+                      role="checkbox"
+                      tabIndex={0}
+                      onClick={() => field.onChange(!field.value)}
+                      onKeyDown={(e) =>
+                        e.key === 'Enter' && field.onChange(!field.value)
+                      }
+                      className="w-5 h-5 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
+                      aria-checked={field.value}
+                    >
+                      {field.value && (
+                        <span className="w-2.5 h-2.5 bg-dpg-gold block" />
+                      )}
+                    </span>
+                    <span
+                      className="ml-4 text-sm font-body font-medium"
+                      style={{
+                        color: errors.kvkk ? '#b91c1c' : theme.colors.textMuted,
+                      }}
+                    >
+                      KVKK kapsamında kişisel verilerimin işlenmesini kabul ediyorum.
+                    </span>
+                  </label>
+                  {errors.kvkk && (
+                    <p className="text-xs text-red-500 font-body mt-1 ml-9">
+                      {errors.kvkk.message}
+                    </p>
+                  )}
+                </>
+              )}
+            />
+          </div>
+
+          <Button type="submit" className="w-full" style={{ opacity: submitting ? 0.7 : 1 }}>
+            {submitting ? 'İşleniyor...' : 'Katılımımı Onayla'}
+          </Button>
+        </form>
       )}
     </motion.section>
   );

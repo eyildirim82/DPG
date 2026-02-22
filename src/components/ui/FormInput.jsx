@@ -37,17 +37,18 @@ export default function FormInput({
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className="w-full bg-transparent border-0 border-b border-white/20 py-4 text-dpg-text font-heading text-base md:text-2xl outline-none transition-colors duration-300 min-h-[44px]"
+        className="w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-md px-4 py-4 text-dpg-text font-heading text-base md:text-xl outline-none transition-colors duration-300 min-h-[56px]"
         style={{
-          borderBottomColor: error ? '#b91c1c' : focused ? theme.colors.gold : undefined,
+          borderColor: error ? '#b91c1c' : focused ? theme.colors.gold : undefined,
           ...style,
         }}
         {...rest}
       />
       <label
-        className="absolute top-0 left-0 font-body text-xs text-dpg-text-muted uppercase tracking-widest pointer-events-none transition-all duration-300"
+        className="absolute font-body text-xs text-dpg-text-muted uppercase tracking-widest pointer-events-none transition-all duration-300"
         style={{
-          top: isActive ? '-20px' : 0,
+          left: isActive ? '0' : '16px',
+          top: isActive ? '-20px' : '18px',
           color: isActive ? theme.colors.gold : undefined,
           fontSize: isActive ? '0.7rem' : '0.8rem',
         }}
