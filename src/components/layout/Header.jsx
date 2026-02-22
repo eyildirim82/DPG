@@ -11,7 +11,7 @@ export default function Header({ altMode = false }) {
         <img
           src="/talpa-logo.webp"
           alt="TALPA - Türkiye Havayolu Pilotları Derneği"
-          className="h-14 md:h-[4.5rem] w-auto object-contain"
+          className="h-20 md:h-[6.5rem] w-auto object-contain"
         />
       </a>
     </header>

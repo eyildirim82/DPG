@@ -9,7 +9,7 @@
   --color-gold-dim: #957a5d;
   --color-silver: #C4CCD4;
   --color-text: #F0F4F8;
-  --color-text-muted: #8B9BB4;
+  --color-text-muted: #BDBDBD;
 }
 
 * {
@@ -22,7 +22,7 @@
 body {
   background-color: var(--color-bg);
   overflow-x: hidden;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Cantarell', sans-serif;
   font-size: 16px;
   color: var(--color-text);
   line-height: 1.6;

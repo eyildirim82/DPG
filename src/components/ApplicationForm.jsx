@@ -121,6 +121,10 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         </div>
       )}
 
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {step === 2 && "T.C. Kimlik No doğrulandı. Başvuru formu açıldı. Lütfen bilgilerinizi eksiksiz doldurun."}
+      </div>
+
       {step === 1 ? (
         <form onSubmit={handleTcSubmit} noValidate>
           <div className="mb-8">
@@ -136,11 +140,11 @@ export default function ApplicationForm({ onSubmitSuccess }) {
               label="TC Kimlik No"
               error={tcError}
             />
-            <p className="text-dpg-text-muted text-xs font-body mt-2">
+            <p className="text-dpg-text-muted text-sm font-body mt-2 px-1">
               11 haneli TC Kimlik Numaranızı girin. Geçerli ise başvuru formu açılacaktır.
             </p>
           </div>
-          <Button type="submit" className="w-full min-h-[44px]">
+          <Button type="submit" className="w-full min-h-[48px] mt-2">
             Devam
           </Button>
         </form>

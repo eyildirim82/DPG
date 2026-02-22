@@ -45,7 +45,7 @@ export default function Hero({ onScrollTo }) {
 
   return (
     <motion.section
-      className="min-h-[80vh] md:min-h-screen flex flex-col justify-center items-center text-center relative pt-12 md:pt-16 px-4"
+      className="min-h-[80vh] md:min-h-screen flex flex-col justify-center items-center text-center relative pt-32 md:pt-44 px-4"
       style={{ isolation: 'isolate' }}
       initial="hidden"
       animate="visible"
@@ -62,15 +62,10 @@ export default function Hero({ onScrollTo }) {
           maskImage: 'linear-gradient(to bottom, transparent, black 40%, black 60%, transparent)',
         }}
       />
-      <motion.div
-        variants={item}
-        className="text-sm md:text-xl tracking-[0.2em] text-dpg-silver mt-4 md:mt-24 mb-2 md:mb-8 uppercase font-body font-light"
-      >
-        26 Nisan
-      </motion.div>
+
       <motion.h1
         variants={item}
-        className="font-heading font-normal tracking-wide uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-none mb-4 md:mb-8 text-center"
+        className="font-heading font-medium tracking-normal uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-tight mb-4 md:mb-8 text-center"
         style={{
           background: 'linear-gradient(to bottom, #E6C275, #9E8245)',
           WebkitBackgroundClip: 'text',
@@ -89,13 +84,15 @@ export default function Hero({ onScrollTo }) {
           <div
             className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 transition-opacity duration-300 pointer-events-none bg-dpg-navy"
             style={{ opacity: videoLoaded ? 0 : 1 }}
+            aria-live="polite"
+            aria-busy={!videoLoaded}
           >
-            <img src="/talpa-logo.webp" alt="TALPA" className="h-20 md:h-28 w-auto object-contain opacity-90" />
+            <img src="/talpa-logo.webp" alt="TALPA" className="h-28 md:h-36 w-auto object-contain opacity-90" />
             <span className="text-dpg-text-muted font-body text-sm">Yükleniyor...</span>
           </div>
           {videoError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-20 bg-dpg-navy p-4">
-              <img src="/talpa-logo.webp" alt="TALPA" className="h-16 w-auto object-contain opacity-80" />
+              <img src="/talpa-logo.webp" alt="TALPA" className="h-24 md:h-28 w-auto object-contain opacity-80" />
               <p className="text-dpg-text-muted text-sm text-center">{videoError}</p>
             </div>
           )}
@@ -103,7 +100,7 @@ export default function Hero({ onScrollTo }) {
             <button
               type="button"
               onClick={handlePlayClick}
-              className="absolute inset-0 z-[2] flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer"
+              className="absolute inset-0 z-[2] flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-dpg-gold focus-visible:outline-offset-2"
               aria-label="Videoyu oynat"
             >
               <span className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-dpg-gold border-2 border-dpg-gold/80 bg-dpg-navy/80 hover:bg-dpg-gold/20 transition-colors">
@@ -143,7 +140,7 @@ export default function Hero({ onScrollTo }) {
       </motion.div>
       <motion.div
         variants={item}
-        className="mt-8 md:mt-16 opacity-90 text-[10px] md:text-sm tracking-widest text-dpg-silver flex flex-col items-center gap-2 md:gap-3"
+        className="mt-8 md:mt-16 opacity-90 text-xs md:text-sm tracking-widest text-dpg-silver flex flex-col items-center gap-2 md:gap-3"
       >
         ANA SPONSOR
         <img

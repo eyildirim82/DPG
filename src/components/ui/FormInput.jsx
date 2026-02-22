@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { theme } from '../../styles/theme';
 
 export default function FormInput({
@@ -16,6 +16,8 @@ export default function FormInput({
   ...rest
 }) {
   const [internalFocused, setInternalFocused] = useState(false);
+  const uniqueId = useId();
+  const inputId = rest.id || uniqueId;
   const focused = focusedProp !== undefined ? focusedProp : internalFocused;
   const hasValue = value != null && String(value).length > 0;
   const isActive = focused || hasValue;
@@ -30,6 +32,7 @@ export default function FormInput({
   return (
     <div className="mb-10 relative">
       <input
+        id={inputId}
         type={type}
         placeholder={placeholder}
         required={required}
@@ -45,7 +48,8 @@ export default function FormInput({
         {...rest}
       />
       <label
-        className="absolute font-body text-xs text-dpg-text-muted uppercase tracking-widest pointer-events-none transition-all duration-300"
+        htmlFor={inputId}
+        className="absolute font-body text-xs text-dpg-text-muted uppercase tracking-widest cursor-text transition-all duration-300"
         style={{
           left: isActive ? '0' : '16px',
           top: isActive ? '-20px' : '18px',
