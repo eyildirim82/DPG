@@ -33,6 +33,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   const [quotaStats, setQuotaStats] = useState(null);
   const [attendedBefore, setAttendedBefore] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [ticketType, setTicketType] = useState(null);
   const [selectedCluster, setSelectedCluster] = useState('Otomatik');
   const [submittingSeating, setSubmittingSeating] = useState(false);
   const [lockExpiresAt, setLockExpiresAt] = useState(null);
@@ -164,7 +165,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           setLockExpiresAt(new Date(data.lock_expires_at));
         }
         if (data.ticket_type) {
-          setSubmissionStatus(data.ticket_type);
+          setTicketType(data.ticket_type);
         }
         if (data.remaining_seconds !== undefined) {
           setRemainingSeconds(data.remaining_seconds);
@@ -258,13 +259,14 @@ export default function ApplicationForm({ onSubmitSuccess }) {
       // Check for existing application
       const { data: existingApp, error: fetchError } = await supabase
         .from('cf_submissions')
-        .select('data, status, seating_preference')
+        .select('data, status, seating_preference, ticket_type')
         .eq('tc_no', tc)
         .eq('user_id', session.user.id)
         .maybeSingle();
 
       if (existingApp) {
         setSubmissionStatus(existingApp.status);
+        if (existingApp.ticket_type) setTicketType(existingApp.ticket_type);
         if (existingApp.seating_preference) {
           try {
             const prefs = JSON.parse(existingApp.seating_preference);
@@ -352,6 +354,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         setTcInput('');
         setValue('tcNo', '');
         setSubmissionStatus(null);
+        setTicketType(null);
         setAttendedBefore(false);
       }
     } catch (err) {
@@ -588,7 +591,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             <span>TC Kimlik No: {(watch('tcNo') || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$2**$3*$4')}</span>
             <button
               type="button"
-              onClick={() => { setStep(1); setTcInput(''); setValue('tcNo', ''); setAttendedBefore(false); setSubmissionStatus(null); }}
+              onClick={() => { setStep(1); setTcInput(''); setValue('tcNo', ''); setAttendedBefore(false); setSubmissionStatus(null); setTicketType(null); }}
               className="text-dpg-gold text-xs underline hover:no-underline"
             >
               Değiştir
@@ -847,7 +850,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           </div>
 
           <Button type="submit" className="w-full" style={{ opacity: submitting || deleting ? 0.7 : 1 }} disabled={submitting || deleting}>
-            {submitting ? 'İşleniyor...' : submissionStatus === 'asil' ? 'Katılımımı Onayla (ASİL)' : submissionStatus === 'yedek' ? 'Katılımımı Onayla (YEDEK)' : 'Katılımımı Onayla'}
+            {submitting ? 'İşleniyor...' : ticketType === 'asil' ? 'Katılımımı Onayla (ASİL)' : ticketType === 'yedek' ? 'Katılımımı Onayla (YEDEK)' : 'Katılımımı Onayla'}
           </Button>
 
           {submissionStatus && submissionStatus !== 'cancelled' && (
