@@ -33,12 +33,29 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   const [quotaStats, setQuotaStats] = useState(null);
   const [attendedBefore, setAttendedBefore] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
-  const [selectedCluster, setSelectedCluster] = useState('');
+  const [selectedCluster, setSelectedCluster] = useState('Otomatik');
   const [submittingSeating, setSubmittingSeating] = useState(false);
   const [lockExpiresAt, setLockExpiresAt] = useState(null);
   const [timeLeft, setTimeLeft] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [tableStats, setTableStats] = useState([]);
   const firstErrorRef = useRef(null);
+
+  useEffect(() => {
+    if (step === 3) {
+      const fetchTableStats = async () => {
+        try {
+          const { data, error } = await supabase.rpc('get_table_stats');
+          if (!error && data) {
+            setTableStats(data);
+          }
+        } catch (err) {
+          console.error('Error fetching table stats:', err);
+        }
+      };
+      fetchTableStats();
+    }
+  }, [step]);
 
   useEffect(() => {
     const fetchQuota = async () => {
@@ -481,30 +498,44 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
           <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
+              { id: 'Otomatik', name: 'Beni Otomatik Yerleştir (Önerilen)', desc: 'Ekibimiz sizi ve sevdiklerinizi meslektaşlarınızla en uygun şekilde yerleştirecektir.' },
               { id: 'KumeA', name: 'A Kümesi', desc: 'Sahne Önü ve Protokol Çevresi' },
               { id: 'KumeB', name: 'B Kümesi', desc: 'Salonun Orta Kısımları' },
               { id: 'KumeC', name: 'C Kümesi', desc: 'Geniş Alan ve Yan Koridorlar' },
               { id: 'KumeD', name: 'D Kümesi', desc: 'Arka Localar ve Dinlenme Alanı' }
-            ].map(cluster => (
-              <div
-                key={cluster.id}
-                onClick={() => setSelectedCluster(cluster.id)}
-                className={`cursor-pointer border-2 rounded-lg p-5 transition-all duration-300 ${selectedCluster === cluster.id
-                  ? 'border-dpg-gold bg-dpg-gold/20 shadow-[0_0_15px_rgba(230,194,117,0.3)]'
-                  : 'border-white/10 bg-white/5 hover:bg-white/10 border-dashed'
-                  }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedCluster === cluster.id ? 'border-dpg-gold' : 'border-gray-500'}`}>
-                    {selectedCluster === cluster.id && <div className="w-3 h-3 bg-dpg-gold rounded-full"></div>}
-                  </div>
-                  <div>
-                    <h4 className={`text-xl font-bold font-heading mb-1 ${selectedCluster === cluster.id ? 'text-dpg-gold' : 'text-gray-300'}`}>{cluster.name}</h4>
-                    <p className="text-sm font-body text-gray-400">{cluster.desc}</p>
+            ].map(cluster => {
+              const clusterStats = tableStats.filter(s => s.cluster === cluster.id);
+              return (
+                <div
+                  key={cluster.id}
+                  onClick={() => setSelectedCluster(cluster.id)}
+                  className={`cursor-pointer border-2 rounded-lg p-5 transition-all duration-300 ${selectedCluster === cluster.id
+                    ? 'border-dpg-gold bg-dpg-gold/20 shadow-[0_0_15px_rgba(230,194,117,0.3)]'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10 border-dashed'
+                    }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedCluster === cluster.id ? 'border-dpg-gold' : 'border-gray-500'}`}>
+                      {selectedCluster === cluster.id && <div className="w-3 h-3 bg-dpg-gold rounded-full"></div>}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`text-xl font-bold font-heading mb-1 ${selectedCluster === cluster.id ? 'text-dpg-gold' : 'text-gray-300'}`}>{cluster.name}</h4>
+                      <p className="text-sm font-body text-gray-400">{cluster.desc}</p>
+                      {cluster.id !== 'Otomatik' && clusterStats.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {clusterStats.map((stat, idx) => (
+                            <span key={idx} className="bg-white/10 px-2 py-1 rounded text-xs text-gray-300 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-dpg-gold/70"></span>
+                              {stat.airline}: {stat.count}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           <Button type="submit" disabled={!selectedCluster} className="w-full" style={{ opacity: submittingSeating || !selectedCluster ? 0.7 : 1 }}>
@@ -514,11 +545,15 @@ export default function ApplicationForm({ onSubmitSuccess }) {
       ) : (
         <form onSubmit={handleSubmit(onValid, onInvalid)} noValidate>
           {lockExpiresAt && timeLeft && !submissionStatus && (
-            <div className="mb-6 py-4 px-4 rounded border border-dpg-gold bg-dpg-gold/10 text-dpg-gold text-center font-bold text-lg md:text-xl flex justify-center items-center gap-3 shadow-[0_0_15px_rgba(230,194,117,0.15)] animate-pulse-slow">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Kaptanım, yeriniz 15 dk ayrılmıştır. Kalan: {timeLeft}</span>
+            <div className="mb-6 py-6 px-4 rounded-xl border-2 border-dpg-gold/60 bg-dpg-gold/10 text-dpg-gold text-center font-bold text-2xl flex flex-col items-center gap-3 shadow-[0_0_20px_rgba(230,194,117,0.2)] animate-pulse-slow">
+              <span className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Geçici Rezervasyon Süreniz
+              </span>
+              <span className="text-4xl text-white tracking-widest bg-dpg-gold/20 px-4 py-2 rounded-lg border border-dpg-gold/30">{timeLeft}</span>
+              <span className="text-sm text-dpg-gold/80 font-normal">Kaptanım, yeriniz geçici olarak ayrılmıştır. Lütfen kaydınızı tamamlayın.</span>
             </div>
           )}
 

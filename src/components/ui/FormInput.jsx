@@ -40,7 +40,7 @@ export default function FormInput({
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className="w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-md px-4 py-4 text-dpg-text font-heading text-lg md:text-xl outline-none transition-colors duration-300 min-h-[64px]"
+        className="w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-md px-4 py-4 text-dpg-text font-heading text-[20px] outline-none transition-colors duration-300 min-h-[60px]"
         style={{
           borderColor: error ? '#b91c1c' : focused ? theme.colors.gold : undefined,
           ...style,
