@@ -49,14 +49,27 @@ export const applicationFormSchema = z
         (val) => (val && val.replace(/\D/g, '').length >= 10) || false,
         'Geçerli bir telefon numarası giriniz (en az 10 hane).'
       ),
-    participation: z.enum(['physical', 'online'], {
-      required_error: 'Katılım tipi seçiniz.',
-      invalid_type_error: 'Katılım tipi seçiniz.',
-    }),
-    kvkk: z.literal(true, {
-      errorMap: () => ({ message: 'KVKK metnini kabul etmeniz gerekmektedir.' }),
+    birthYear: z.string().refine((val) => {
+      const year = parseInt(val, 10);
+      return !isNaN(year) && year > 1900 && year <= new Date().getFullYear();
+    }, 'Geçerli bir doğum yılı giriniz.'),
+    bringGuest: z.boolean().optional().default(false),
+    guestName: z.string().optional(),
+    paymentApproval: z.literal(true, {
+      errorMap: () => ({ message: 'Ödeme tahsilatını onaylamanız gerekmektedir.' }),
     }),
   })
-  .required();
+  .refine(
+    (data) => {
+      if (data.bringGuest) {
+        return data.guestName && data.guestName.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Lütfen misafirinizin adını ve soyadını giriniz.',
+      path: ['guestName'],
+    }
+  );
 
 export { tcNoSchema };

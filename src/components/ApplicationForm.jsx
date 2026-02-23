@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
@@ -6,24 +6,73 @@ import FormInput from './ui/FormInput';
 import Button from './ui/Button';
 import { theme } from '../styles/theme';
 import { applicationFormSchema, isValidTCKimlikNo } from '../lib/validation';
+import { supabase } from '../lib/supabase';
 
 const defaultValues = {
   tcNo: '',
   name: '',
   airline: '',
+  birthYear: '',
   email: '',
   phone: '',
-  participation: '',
-  kvkk: false,
+  bringGuest: false,
+  guestName: '',
+  paymentApproval: false,
 };
 
 export default function ApplicationForm({ onSubmitSuccess }) {
   const [step, setStep] = useState(1);
   const [tcInput, setTcInput] = useState('');
   const [tcError, setTcError] = useState(null);
+  const [emailInput, setEmailInput] = useState('');
+  const [maskedEmail, setMaskedEmail] = useState('');
+  const [otpInput, setOtpInput] = useState('');
+  const [otpError, setOtpError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [quotaStats, setQuotaStats] = useState(null);
+  const [attendedBefore, setAttendedBefore] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [selectedCluster, setSelectedCluster] = useState('');
+  const [submittingSeating, setSubmittingSeating] = useState(false);
+  const [lockExpiresAt, setLockExpiresAt] = useState(null);
+  const [timeLeft, setTimeLeft] = useState('');
+  const [deleting, setDeleting] = useState(false);
   const firstErrorRef = useRef(null);
+
+  useEffect(() => {
+    const fetchQuota = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_ticket_stats');
+        if (!error && data) {
+          setQuotaStats(data);
+        }
+      } catch (err) {
+        console.error('Error fetching quota:', err);
+      }
+    };
+    fetchQuota();
+  }, []);
+
+  useEffect(() => {
+    if (!lockExpiresAt || step !== 2) return;
+
+    const interval = setInterval(() => {
+      const now = new Date();
+      const diff = lockExpiresAt - now;
+      if (diff <= 0) {
+        clearInterval(interval);
+        setTimeLeft('Süreniz doldu');
+        setApiError('15 dakikalık kayıt süreniz dolmuştur. Lütfen tekrar TC giriniz.');
+        setStep(1); // Redirect to start
+      } else {
+        const m = Math.floor(diff / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockExpiresAt, step]);
 
   const {
     control,
@@ -37,38 +86,271 @@ export default function ApplicationForm({ onSubmitSuccess }) {
     resolver: zodResolver(applicationFormSchema),
   });
 
-  const participation = watch('participation');
-  const kvkk = watch('kvkk');
+  const bringGuest = watch('bringGuest');
+  const paymentApproval = watch('paymentApproval');
 
-  const handleTcSubmit = (e) => {
+  const handleTcSubmit = async (e) => {
     e.preventDefault();
     setTcError(null);
-    const trimmed = tcInput.replace(/\D/g, '');
-    if (trimmed.length !== 11) {
+    setSubmitting(true);
+
+    const trimmedTc = tcInput.replace(/\D/g, '');
+
+    if (trimmedTc.length !== 11) {
       setTcError('TC Kimlik No 11 rakamdan oluşmalıdır.');
+      setSubmitting(false);
       return;
     }
-    if (!isValidTCKimlikNo(trimmed)) {
+    if (!isValidTCKimlikNo(trimmedTc)) {
       setTcError('Geçerli bir TC Kimlik No giriniz.');
+      setSubmitting(false);
       return;
     }
-    setValue('tcNo', trimmed);
-    setStep(2);
+
+    try {
+      const { data, error } = await supabase.rpc('check_and_lock_slot', { p_tc_no: trimmedTc });
+
+      if (error || !data || !data.success) {
+        if (data?.error_type === 'not_found' || (!data && error)) {
+          setTcError(
+            <span>TALPA üyesi değilsiniz, üyelik başvurusu için <a href="https://www.talpa.org/uyelik/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-300 transition-colors">tıklayınız</a>.</span>
+          );
+        } else if (data?.error_type === 'debtor') {
+          setTcError(
+            <span>Aidat borcunuz bulunmaktadır, DPG etkinliği kayıt sistemini kullanabilmeniz için <a href="https://www.talpa.org/aidat/" target="_blank" rel="noopener noreferrer" className="underline hover:text-red-300 transition-colors">borcunuzu ödemeniz</a> gerekmektedir.</span>
+          );
+        } else if (data?.error_type === 'quota_full') {
+          setTcError('Maalesef kotalarımız dolmuştur. İlginize teşekkür ederiz.');
+        } else {
+          setTcError(data?.message || 'Sistemde bir hata oluştu. Lütfen tekrar deneyin.');
+        }
+        setSubmitting(false);
+        return;
+      }
+
+      const isAttendedBefore = !!data.is_attended_before;
+      setAttendedBefore(isAttendedBefore);
+
+      if (data.status === 'locked' && data.lock_expires_at) {
+        setLockExpiresAt(new Date(data.lock_expires_at));
+      }
+
+      // If they already have an application process beyond "locked", retrieve email + OTP
+      if (data.status !== 'locked') {
+        const { data: emailData, error: emailError } = await supabase.rpc('get_submission_email', { p_tc_no: trimmedTc });
+
+        if (emailData && emailData.exists && emailData.email) {
+          const registeredEmail = emailData.email;
+          const { error: signInError } = await supabase.auth.signInWithOtp({
+            email: registeredEmail,
+            options: { shouldCreateUser: true }
+          });
+
+          if (signInError) {
+            console.error("Supabase Auth OTP error:", signInError);
+            setTcError(signInError.message.includes('rate limit')
+              ? 'Çok fazla kod istediniz. Lütfen bir süre bekleyip tekrar deneyin.'
+              : 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.');
+            setSubmitting(false);
+            return;
+          }
+
+          setValue('tcNo', trimmedTc);
+          setEmailInput(registeredEmail);
+
+          const [local, domain] = registeredEmail.split('@');
+          if (local && domain) {
+            const maskedLocal = local.length > 2 ? local.substring(0, 2) + '*'.repeat(local.length - 2) : local;
+            const maskedDomain = domain.length > 5 ? domain.substring(0, 1) + '*'.repeat(domain.length - 5) + domain.substring(domain.length - 4) : domain;
+            setMaskedEmail(`${maskedLocal}@${maskedDomain}`);
+          } else {
+            setMaskedEmail('*****@*****.***');
+          }
+          setStep(1.5);
+        } else {
+          // Fallback if status is approved but somehow email missing
+          setValue('tcNo', trimmedTc);
+          setStep(2);
+        }
+      } else {
+        // Just locked, go straight to form
+        setValue('tcNo', trimmedTc);
+        setStep(2);
+      }
+    } catch (err) {
+      console.error(err);
+      setTcError('Sistemde bir iletişim hatası oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const onValid = async () => {
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    setOtpError(null);
+    setSubmitting(true);
+
+    if (otpInput.length !== 8) {
+      setOtpError('Lütfen 8 haneli doğrulama kodunu giriniz.');
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const { data: { session }, error } = await supabase.auth.verifyOtp({
+        email: emailInput.trim(),
+        token: otpInput,
+        type: 'email'
+      });
+
+      if (error || !session) {
+        setOtpError('Hatalı veya süresi dolmuş doğrulama kodu.');
+        setSubmitting(false);
+        return;
+      }
+
+      const tc = watch('tcNo');
+
+      // Check for existing application
+      const { data: existingApp, error: fetchError } = await supabase
+        .from('cf_submissions')
+        .select('data, status, seating_preference')
+        .eq('tc_no', tc)
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (existingApp) {
+        setSubmissionStatus(existingApp.status);
+        if (existingApp.seating_preference) {
+          try {
+            const prefs = JSON.parse(existingApp.seating_preference);
+            if (prefs && prefs.cluster) setSelectedCluster(prefs.cluster);
+          } catch (e) {
+            setSelectedCluster(existingApp.seating_preference);
+          }
+        }
+
+        // Always show form (Step 2) to allow editing
+        reset({ ...defaultValues, ...existingApp.data, email: emailInput.trim(), tcNo: tc });
+        setStep(2);
+      } else {
+        // Just empty form prepopulated with email
+        setSubmissionStatus(null);
+        reset({ ...defaultValues, tcNo: tc, email: emailInput.trim() });
+        setStep(2);
+      }
+    } catch (err) {
+      console.error(err);
+      setOtpError('Sistem hatası.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+
+
+  const handleSeatingSubmit = async (e) => {
+    e.preventDefault();
+    setSubmittingSeating(true);
+    setApiError(null);
+    try {
+      const tc = watch('tcNo');
+      const prefsStr = JSON.stringify({ cluster: selectedCluster });
+      const { data, error } = await supabase.rpc('update_seating_preference', {
+        p_tc_no: tc,
+        p_preferences: prefsStr
+      });
+      if (error || !data.success) {
+        setApiError(error?.message || data?.message || 'Kaydedilemedi.');
+      } else {
+        alert('Tercihleriniz başarıyla kaydedildi!');
+      }
+    } catch (err) {
+      console.error(err);
+      setApiError('Bir hata oluştu.');
+    } finally {
+      setSubmittingSeating(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    const firstConfirm = window.confirm("Dikkat: Başvurunuzu iptal ederseniz mevcut rezervasyonunuzu/sıranızı kaybedeceksiniz.\n\nBaşvurunuzu iptal etmek istediğinize emin misiniz?");
+    if (!firstConfirm) {
+      return;
+    }
+
+    const secondConfirm = window.confirm("Son Onay: Başvurunuz iptal edilecek ve bu işlem geri alınamaz. Onaylıyor musunuz?");
+    if (!secondConfirm) {
+      return;
+    }
+
+    setDeleting(true);
+    setApiError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setApiError('Oturum süresi dolmuş. Lütfen sayfayı yenileyip tekrar giriş yapın.');
+        setDeleting(false);
+        return;
+      }
+
+      const tc = watch('tcNo');
+      const { data, error } = await supabase.rpc('cancel_application', {
+        p_tc_no: tc,
+        p_user_id: session.user.id
+      });
+
+      if (error || !data?.success) {
+        setApiError(error?.message || data?.message || 'Başvuru iptal edilirken hata oluştu.');
+      } else {
+        alert('Başvurunuz başarıyla iptal edilmiştir.');
+        setStep(1);
+        setTcInput('');
+        setValue('tcNo', '');
+        setSubmissionStatus(null);
+        setAttendedBefore(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setApiError('İletişim hatası oluştu.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const onValid = async (formData) => {
     setApiError(null);
     setSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 1200));
+      // Get current auth session to attach user_id
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const { data, error } = await supabase.rpc('submit_application', {
+        p_tc_no: formData.tcNo,
+        p_data: formData,
+        p_bring_guest: formData.bringGuest,
+        p_user_id: session?.user?.id || null
+      });
+
+      if (error) {
+        if (error.message && error.message.includes('Kota dolmuştur')) {
+          setApiError('Maalesef kotalarımız dolmuştur. İlginize teşekkür ederiz.');
+        } else {
+          console.error(error);
+          setApiError('Başvuru gönderilemedi. Lütfen tekrar deneyin veya bizimle iletişime geçin.');
+        }
+        return;
+      }
+
       onSubmitSuccess?.();
       reset(defaultValues);
       setStep(1);
       setTcInput('');
       setTcError(null);
     } catch (err) {
+      console.error(err);
       setApiError(
-        'Başvuru gönderilemedi. Lütfen tekrar deneyin veya bizimle iletişime geçin.'
+        'Başvuru gönderilirken bir iletişim hatası oluştu.'
       );
     } finally {
       setSubmitting(false);
@@ -86,14 +368,14 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   return (
     <motion.section
       id="basvur"
-      className="py-16 md:py-24 max-w-[700px] mx-auto px-4 md:px-0"
+      className="py-10 md:py-16 max-w-[700px] mx-auto px-4 md:px-0"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
       transition={{ duration: 0.6 }}
     >
-      <div className="text-center mb-8 md:mb-12">
-        <h2 className="font-heading font-normal tracking-wide uppercase text-3xl md:text-4xl text-dpg-silver text-center mb-8 md:mb-12 relative inline-block">
+      <div className="text-center mb-6 md:mb-8">
+        <h2 className="font-heading font-normal tracking-wide uppercase text-3xl md:text-4xl text-dpg-silver text-center mb-6 md:mb-8 relative inline-block">
           Başvuru Formu
           <span className="block w-[60px] h-px bg-dpg-gold mt-2.5 mx-auto" />
         </h2>
@@ -101,15 +383,28 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
       {/* Ücret ve başvuru tarihi vurgusu */}
       <div
-        className="border border-dpg-gold/60 rounded-sm py-4 px-4 md:py-5 md:px-6 mb-8 md:mb-10 text-center"
+        className="border border-dpg-gold/60 rounded-sm py-4 px-4 md:py-5 md:px-6 mb-8 text-center"
         style={{ backgroundColor: 'rgba(230, 194, 117, 0.06)' }}
       >
         <p className="font-heading text-dpg-gold text-lg md:text-xl font-semibold tracking-wide">
-          Katılım ücreti: 3.000 TL
+          Katılım ücreti: {bringGuest ? '6.000 TL (2 Kişi)' : '3.000 TL'}
         </p>
         <p className="text-dpg-text-muted text-xs md:text-sm mt-1 font-body">
           Başvuru açılış: 2 Mart 2026, 15:00
         </p>
+        {quotaStats && (
+          <div className="mt-4 pt-4 border-t border-dpg-gold/20 flex flex-col md:flex-row justify-center items-center gap-4 text-sm font-body">
+            <div className="text-dpg-silver">
+              <span className="text-dpg-gold mr-1">Asil Kota (Dolu):</span>
+              {Math.min(quotaStats.total_reserved, quotaStats.asil_capacity)} / {quotaStats.asil_capacity}
+            </div>
+            <div className="hidden md:block w-px h-4 bg-dpg-gold/30"></div>
+            <div className="text-dpg-silver">
+              <span className="text-dpg-gold mr-1">Yedek Kota (Dolu):</span>
+              {Math.max(0, quotaStats.total_reserved - quotaStats.asil_capacity)} / {quotaStats.yedek_capacity}
+            </div>
+          </div>
+        )}
       </div>
 
       {apiError && (
@@ -127,7 +422,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
       {step === 1 ? (
         <form onSubmit={handleTcSubmit} noValidate>
-          <div className="mb-8">
+          <div className="mb-4">
             <FormInput
               type="text"
               inputMode="numeric"
@@ -141,25 +436,125 @@ export default function ApplicationForm({ onSubmitSuccess }) {
               error={tcError}
             />
             <p className="text-dpg-text-muted text-sm font-body mt-2 px-1">
-              11 haneli TC Kimlik Numaranızı girin. Geçerli ise başvuru formu açılacaktır.
+              11 haneli TC Kimlik Numaranızı giriniz.
             </p>
           </div>
-          <Button type="submit" className="w-full min-h-[48px] mt-2">
-            Devam
+          <Button type="submit" className="w-full min-h-[48px] mt-2 mb-8" style={{ opacity: submitting ? 0.7 : 1 }}>
+            {submitting ? 'Sorgulanıyor...' : 'Devam'}
+          </Button>
+        </form>
+      ) : step === 1.5 ? (
+        <form onSubmit={handleOtpSubmit} noValidate>
+          <div className="mb-8">
+            <p className="text-dpg-text-muted text-sm font-body mb-4 px-1 leading-relaxed">
+              Katılım kaydınızdaki <strong className="text-dpg-gold">{maskedEmail}</strong> adresine gönderilen 8 haneli doğrulama kodunu giriniz. (E-postayı göremiyorsanız Gereksiz (Spam) kutusunu kontrol ediniz.)
+            </p>
+            <FormInput
+              type="text"
+              inputMode="numeric"
+              maxLength={8}
+              placeholder=" "
+              value={otpInput}
+              onChange={(e) => {
+                setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 8));
+                setOtpError(null);
+              }}
+              label="8 Haneli Doğrulama Kodu"
+              error={otpError}
+            />
+          </div>
+          <div className="flex gap-4 mt-2">
+            <Button type="button" secondary onClick={() => { setStep(1); setOtpInput(''); }} className="w-1/3 min-h-[48px]">
+              Geri
+            </Button>
+            <Button type="submit" className="w-2/3 min-h-[48px]" style={{ opacity: submitting ? 0.7 : 1 }}>
+              {submitting ? 'Doğrulanıyor...' : 'Doğrula'}
+            </Button>
+          </div>
+        </form>
+      ) : step === 3 ? (
+        <form onSubmit={handleSeatingSubmit} noValidate>
+          <div className="mb-6 py-4 px-5 rounded border border-green-500/30 bg-green-500/10 text-green-100 text-sm font-body">
+            <h3 className="text-lg font-bold text-green-400 mb-2">Başvurunuz Onaylanmıştır!</h3>
+            <p className="text-base text-gray-200">Aşağıdaki oturma kümelerinden birini seçerek Gala alanındaki yerinizi belirtebilirsiniz. Arkadaşlarınızla aynı kümeyi seçerek yan yana oturabilirsiniz.</p>
+          </div>
+
+          <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { id: 'KumeA', name: 'A Kümesi', desc: 'Sahne Önü ve Protokol Çevresi' },
+              { id: 'KumeB', name: 'B Kümesi', desc: 'Salonun Orta Kısımları' },
+              { id: 'KumeC', name: 'C Kümesi', desc: 'Geniş Alan ve Yan Koridorlar' },
+              { id: 'KumeD', name: 'D Kümesi', desc: 'Arka Localar ve Dinlenme Alanı' }
+            ].map(cluster => (
+              <div
+                key={cluster.id}
+                onClick={() => setSelectedCluster(cluster.id)}
+                className={`cursor-pointer border-2 rounded-lg p-5 transition-all duration-300 ${selectedCluster === cluster.id
+                  ? 'border-dpg-gold bg-dpg-gold/20 shadow-[0_0_15px_rgba(230,194,117,0.3)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/10 border-dashed'
+                  }`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedCluster === cluster.id ? 'border-dpg-gold' : 'border-gray-500'}`}>
+                    {selectedCluster === cluster.id && <div className="w-3 h-3 bg-dpg-gold rounded-full"></div>}
+                  </div>
+                  <div>
+                    <h4 className={`text-xl font-bold font-heading mb-1 ${selectedCluster === cluster.id ? 'text-dpg-gold' : 'text-gray-300'}`}>{cluster.name}</h4>
+                    <p className="text-sm font-body text-gray-400">{cluster.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button type="submit" disabled={!selectedCluster} className="w-full" style={{ opacity: submittingSeating || !selectedCluster ? 0.7 : 1 }}>
+            {submittingSeating ? 'Kaydediliyor...' : 'Küme Tercihimi Kaydet'}
           </Button>
         </form>
       ) : (
         <form onSubmit={handleSubmit(onValid, onInvalid)} noValidate>
-          <div className="mb-6 py-3 px-4 rounded border border-dpg-gold/30 bg-dpg-gold/5 text-dpg-text-muted text-sm font-body flex justify-between items-center">
+          {lockExpiresAt && timeLeft && !submissionStatus && (
+            <div className="mb-6 py-4 px-4 rounded border border-dpg-gold bg-dpg-gold/10 text-dpg-gold text-center font-bold text-lg md:text-xl flex justify-center items-center gap-3 shadow-[0_0_15px_rgba(230,194,117,0.15)] animate-pulse-slow">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Kaptanım, yeriniz 15 dk ayrılmıştır. Kalan: {timeLeft}</span>
+            </div>
+          )}
+
+          <div className="mb-6 py-3 px-4 rounded border border-dpg-gold/30 bg-dpg-gold/5 text-dpg-text-muted text-xl font-body flex justify-between items-center">
             <span>TC Kimlik No: {(watch('tcNo') || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$2**$3*$4')}</span>
             <button
               type="button"
-              onClick={() => { setStep(1); setTcInput(''); setValue('tcNo', ''); }}
+              onClick={() => { setStep(1); setTcInput(''); setValue('tcNo', ''); setAttendedBefore(false); setSubmissionStatus(null); }}
               className="text-dpg-gold text-xs underline hover:no-underline"
             >
               Değiştir
             </button>
           </div>
+
+          {(submissionStatus === 'approved' || submissionStatus === 'asil') ? (
+            <div className="mb-6 py-4 px-5 rounded border border-green-500/50 bg-green-500/10 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div>
+                <strong className="block text-green-400 text-base mb-1">Başvurunuz Onaylanmıştır!</strong>
+                <span className="text-green-200 text-sm font-body">Bilgilerinizi aşağıdan güncelleyebilir veya devam edip masa düzeni tercihinizi yapabilirsiniz.</span>
+              </div>
+              <Button type="button" onClick={() => setStep(3)} className="whitespace-nowrap min-h-[44px] bg-green-600 hover:bg-green-500 text-white">
+                Masa Seçimi
+              </Button>
+            </div>
+          ) : submissionStatus ? (
+            <div className="mb-6 py-3 px-4 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-sm font-body">
+              <strong>Bilgilendirme:</strong> Daha önce oluşturduğunuz başvuru formunu görüntülüyorsunuz. Aşağıdan bilgilerinizi güncelleyebilirsiniz.
+            </div>
+          ) : null}
+
+          {attendedBefore && (
+            <div className="mb-6 py-3 px-4 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-sm font-body">
+              <strong>Bilgilendirme:</strong> Geçmiş yıllardaki DPG etkinliklerimize katıldığınız tespit edilmiştir. Kurallar gereği başvurunuz yalnızca <strong>Yedek Liste</strong> üzerinden değerlendirilecektir.
+            </div>
+          )}
+
           <div ref={errors.name ? firstErrorRef : null} data-field-error={!!errors.name}>
             <Controller
               name="name"
@@ -192,6 +587,27 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                   onBlur={field.onBlur}
                   focused={undefined}
                   label="Havayolu Şirketi"
+                  error={error?.message}
+                />
+              )}
+            />
+          </div>
+
+          <div data-field-error={!!errors.birthYear}>
+            <Controller
+              name="birthYear"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormInput
+                  type="text"
+                  inputMode="numeric"
+                  maxLength="4"
+                  placeholder=" "
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ''))}
+                  onBlur={field.onBlur}
+                  focused={undefined}
+                  label="Doğum Yılı"
                   error={error?.message}
                 />
               )}
@@ -236,51 +652,88 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             />
           </div>
 
-          <div className="mb-10 relative" data-field-error={!!errors.participation}>
+          {/* +1 Misafir Seçeneği */}
+          <div
+            className="flex flex-col gap-4 mb-8 p-4 rounded border transition-colors duration-300"
+            style={{
+              borderColor: bringGuest ? 'rgba(230, 194, 117, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+              backgroundColor: bringGuest ? 'rgba(230, 194, 117, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+            }}
+          >
             <Controller
-              name="participation"
+              name="bringGuest"
               control={control}
               render={({ field }) => (
-                <>
-                  <select
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    onBlur={field.onBlur}
-                    className="w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-md px-4 py-4 text-dpg-text font-heading text-base md:text-xl outline-none transition-colors duration-300 appearance-none cursor-pointer min-h-[56px]"
-                    style={{
-                      color: participation ? theme.colors.text : theme.colors.textMuted,
-                      borderColor: errors.participation
-                        ? '#b91c1c'
-                        : participation
-                          ? theme.colors.gold
-                          : undefined,
+                <label className="flex items-start cursor-pointer flex-1">
+                  <input
+                    type="checkbox"
+                    checked={field.value}
+                    onChange={(e) => {
+                      field.onChange(e.target.checked);
+                      if (!e.target.checked) setValue('guestName', '');
                     }}
+                    onBlur={field.onBlur}
+                    className="sr-only"
+                  />
+                  <span
+                    role="checkbox"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      field.onChange(!field.value);
+                      if (field.value) setValue('guestName', '');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        field.onChange(!field.value);
+                        if (field.value) setValue('guestName', '');
+                      }
+                    }}
+                    className="w-5 h-5 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
+                    aria-checked={field.value}
                   >
-                    <option value="">Katılım Tipi Seçiniz</option>
-                    <option value="physical">Fiziksel Katılım (İstanbul)</option>
-                    <option value="online">Online Katılım</option>
-                  </select>
-                  {errors.participation && (
-                    <p className="absolute -bottom-5 left-0 text-xs text-red-500 font-body">
-                      {errors.participation.message}
-                    </p>
-                  )}
-                </>
+                    {field.value && <span className="w-2.5 h-2.5 bg-dpg-gold block" />}
+                  </span>
+                  <span className="ml-4 text-sm font-body font-medium" style={{ color: theme.colors.gold }}>
+                    Yanımda bir misafir getirmek istiyorum (+1 Bilet)
+                  </span>
+                </label>
               )}
             />
+
+            {bringGuest && (
+              <div data-field-error={!!errors.guestName} className="mt-2 text-left">
+                <Controller
+                  name="guestName"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <FormInput
+                      type="text"
+                      placeholder=" "
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      label="Misafir Adı Soyadı"
+                      error={error?.message}
+                    />
+                  )}
+                />
+              </div>
+            )}
           </div>
 
-          {/* KVKK – vurgulu */}
+          {/* Ödeme Onay */}
           <div
             className="flex items-start gap-4 mb-12 p-4 rounded border"
             style={{
-              borderColor: kvkk ? 'rgba(230, 194, 117, 0.5)' : 'rgba(230, 194, 117, 0.3)',
+              borderColor: paymentApproval ? 'rgba(230, 194, 117, 0.5)' : 'rgba(230, 194, 117, 0.3)',
               backgroundColor: 'rgba(230, 194, 117, 0.04)',
             }}
-            data-field-error={!!errors.kvkk}
+            data-field-error={!!errors.paymentApproval}
           >
             <Controller
-              name="kvkk"
+              name="paymentApproval"
               control={control}
               render={({ field }) => (
                 <>
@@ -295,10 +748,16 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                     <span
                       role="checkbox"
                       tabIndex={0}
-                      onClick={() => field.onChange(!field.value)}
-                      onKeyDown={(e) =>
-                        e.key === 'Enter' && field.onChange(!field.value)
-                      }
+                      onClick={(e) => {
+                        e.preventDefault();
+                        field.onChange(!field.value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          field.onChange(!field.value);
+                        }
+                      }}
                       className="w-5 h-5 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
                       aria-checked={field.value}
                     >
@@ -309,15 +768,15 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                     <span
                       className="ml-4 text-sm font-body font-medium"
                       style={{
-                        color: errors.kvkk ? '#b91c1c' : theme.colors.textMuted,
+                        color: errors.paymentApproval ? '#b91c1c' : theme.colors.textMuted,
                       }}
                     >
-                      KVKK kapsamında kişisel verilerimin işlenmesini kabul ediyorum.
+                      {bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin TALPA'ya kayıtlı kredi kartımdan tahsil edilmesini onaylıyorum.
                     </span>
                   </label>
-                  {errors.kvkk && (
+                  {errors.paymentApproval && (
                     <p className="text-xs text-red-500 font-body mt-1 ml-9">
-                      {errors.kvkk.message}
+                      {errors.paymentApproval.message}
                     </p>
                   )}
                 </>
@@ -325,9 +784,23 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             />
           </div>
 
-          <Button type="submit" className="w-full" style={{ opacity: submitting ? 0.7 : 1 }}>
+          <Button type="submit" className="w-full" style={{ opacity: submitting || deleting ? 0.7 : 1 }} disabled={submitting || deleting}>
             {submitting ? 'İşleniyor...' : 'Katılımımı Onayla'}
           </Button>
+
+          {submissionStatus && submissionStatus !== 'cancelled' && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={submitting || deleting}
+                className="text-red-400 hover:text-red-300 text-sm md:text-base font-body underline transition-colors"
+                style={{ opacity: submitting || deleting ? 0.5 : 1 }}
+              >
+                {deleting ? 'İptal Ediliyor...' : 'Başvurumu İptal Et'}
+              </button>
+            </div>
+          )}
         </form>
       )}
     </motion.section>

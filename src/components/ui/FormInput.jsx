@@ -40,7 +40,7 @@ export default function FormInput({
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className="w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-md px-4 py-4 text-dpg-text font-heading text-base md:text-xl outline-none transition-colors duration-300 min-h-[56px]"
+        className="w-full bg-white/5 hover:bg-white/10 border border-white/20 rounded-md px-4 py-4 text-dpg-text font-heading text-lg md:text-xl outline-none transition-colors duration-300 min-h-[64px]"
         style={{
           borderColor: error ? '#b91c1c' : focused ? theme.colors.gold : undefined,
           ...style,
@@ -49,12 +49,12 @@ export default function FormInput({
       />
       <label
         htmlFor={inputId}
-        className="absolute font-body text-xs text-dpg-text-muted uppercase tracking-widest cursor-text transition-all duration-300"
+        className="absolute font-body text-sm text-dpg-text-muted uppercase tracking-widest cursor-text transition-all duration-300"
         style={{
           left: isActive ? '0' : '16px',
-          top: isActive ? '-20px' : '18px',
+          top: isActive ? '-20px' : '20px',
           color: isActive ? theme.colors.gold : undefined,
-          fontSize: isActive ? '0.7rem' : '0.8rem',
+          fontSize: isActive ? '0.85rem' : '1rem',
         }}
       >
         {label}

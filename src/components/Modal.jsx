@@ -28,27 +28,18 @@ export default function Modal({ isOpen, onClose }) {
               Başvurunuz Alınmıştır
             </h3>
             <p className="text-dpg-text-muted font-light text-sm md:text-base mb-6 md:mb-8">
-              Kaydınız başarıyla oluşturuldu. Giriş kartınız aşağıdadır.
+              Kaydınız başarıyla oluşturulmuştur. Etkinlik detayları tarafınıza iletilecektir.
             </p>
-            <div className="w-[120px] h-[120px] md:w-[150px] md:h-[150px] bg-white mx-auto my-6 md:my-8 p-2.5 grid place-items-center">
-              <div
-                className="w-full h-full"
-                style={{
-                  backgroundImage: 'radial-gradient(#000 2px, transparent 2px)',
-                  backgroundSize: '10px 10px',
-                }}
-              />
-            </div>
             <div className="flex flex-col gap-3 items-center mt-4">
               <Button secondary onClick={onClose} className="w-full md:w-auto min-h-[44px]">
                 Takvime Ekle
               </Button>
               <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onClose();
-              }}
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                }}
                 className="text-dpg-text-muted no-underline text-sm hover:underline"
               >
                 Kapat

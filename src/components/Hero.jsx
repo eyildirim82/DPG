@@ -45,7 +45,7 @@ export default function Hero({ onScrollTo }) {
 
   return (
     <motion.section
-      className="min-h-[80vh] md:min-h-screen flex flex-col justify-center items-center text-center relative pt-32 md:pt-44 px-4"
+      className="min-h-[80vh] md:min-h-screen flex flex-col justify-center items-center text-center relative pt-40 md:pt-36 pb-10 md:pb-0 px-4"
       style={{ isolation: 'isolate' }}
       initial="hidden"
       animate="visible"
@@ -65,7 +65,7 @@ export default function Hero({ onScrollTo }) {
 
       <motion.h1
         variants={item}
-        className="font-heading font-medium tracking-normal uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-tight mb-4 md:mb-8 text-center"
+        className="font-heading font-medium tracking-normal uppercase text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl leading-tight mb-4 md:mb-4 text-center"
         style={{
           background: 'linear-gradient(to bottom, #E6C275, #9E8245)',
           WebkitBackgroundClip: 'text',
@@ -77,7 +77,7 @@ export default function Hero({ onScrollTo }) {
       </motion.h1>
       <motion.div
         variants={item}
-        className="w-full max-w-[1100px] mx-auto mb-4 md:mb-10 flex flex-col gap-4 md:gap-6"
+        className="w-full max-w-[1100px] mx-auto mb-4 md:mb-6 flex flex-col gap-4 md:gap-6"
       >
         <div className="relative rounded overflow-hidden border border-dpg-gold-dim flex items-center justify-center w-full aspect-video max-h-[320px] sm:max-h-[380px] md:max-h-[420px] bg-dpg-navy"
         >
@@ -140,13 +140,13 @@ export default function Hero({ onScrollTo }) {
       </motion.div>
       <motion.div
         variants={item}
-        className="mt-8 md:mt-16 opacity-90 text-xs md:text-sm tracking-widest text-dpg-silver flex flex-col items-center gap-2 md:gap-3"
+        className="mt-6 md:mt-10 opacity-90 text-xs md:text-sm tracking-widest text-dpg-silver flex flex-col items-center gap-2 md:gap-3"
       >
         ANA SPONSOR
         <img
           src="/denizbank-logo.svg"
           alt="DenizBank"
-          className="h-8 md:h-10 w-auto object-contain"
+          className="h-14 md:h-20 w-auto object-contain"
         />
       </motion.div>
     </motion.section>
