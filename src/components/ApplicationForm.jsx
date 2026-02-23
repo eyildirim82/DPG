@@ -163,6 +163,9 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         if (data.lock_expires_at) {
           setLockExpiresAt(new Date(data.lock_expires_at));
         }
+        if (data.ticket_type) {
+          setSubmissionStatus(data.ticket_type);
+        }
         if (data.remaining_seconds !== undefined) {
           setRemainingSeconds(data.remaining_seconds);
           const m = Math.floor(data.remaining_seconds / 60);
@@ -577,7 +580,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                 Geçici Rezervasyon Süreniz
               </span>
               <span className="text-4xl text-white tracking-widest bg-dpg-gold/20 px-4 py-2 rounded-lg border border-dpg-gold/30">{timeLeft}</span>
-              <span className="text-sm text-dpg-gold/80 font-normal">Kaptanım, yeriniz geçici olarak ayrılmıştır. Lütfen kaydınızı tamamlayın.</span>
+              <span className="text-sm text-dpg-gold/80 font-normal">Değerli Kaptanımız yeriniz geçici olarak ayrılmıştır. Lütfen kaydınızı tamamlayın.</span>
             </div>
           )}
 
@@ -844,7 +847,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           </div>
 
           <Button type="submit" className="w-full" style={{ opacity: submitting || deleting ? 0.7 : 1 }} disabled={submitting || deleting}>
-            {submitting ? 'İşleniyor...' : 'Katılımımı Onayla'}
+            {submitting ? 'İşleniyor...' : submissionStatus === 'asil' ? 'Katılımımı Onayla (ASİL)' : submissionStatus === 'yedek' ? 'Katılımımı Onayla (YEDEK)' : 'Katılımımı Onayla'}
           </Button>
 
           {submissionStatus && submissionStatus !== 'cancelled' && (
