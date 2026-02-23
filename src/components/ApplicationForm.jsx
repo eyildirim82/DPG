@@ -36,6 +36,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   const [selectedCluster, setSelectedCluster] = useState('Otomatik');
   const [submittingSeating, setSubmittingSeating] = useState(false);
   const [lockExpiresAt, setLockExpiresAt] = useState(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(null);
   const [timeLeft, setTimeLeft] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [tableStats, setTableStats] = useState([]);
@@ -72,24 +73,34 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   }, []);
 
   useEffect(() => {
-    if (!lockExpiresAt || step !== 2) return;
+    if (remainingSeconds === null || step !== 2) return;
+
+    if (remainingSeconds <= 0) {
+      setTimeLeft('Süreniz doldu');
+      setApiError('15 dakikalık kayıt süreniz dolmuştur. Lütfen tekrar TC giriniz.');
+      setStep(1); // Redirect to start
+      return;
+    }
 
     const interval = setInterval(() => {
-      const now = new Date();
-      const diff = lockExpiresAt - now;
-      if (diff <= 0) {
-        clearInterval(interval);
-        setTimeLeft('Süreniz doldu');
-        setApiError('15 dakikalık kayıt süreniz dolmuştur. Lütfen tekrar TC giriniz.');
-        setStep(1); // Redirect to start
-      } else {
-        const m = Math.floor(diff / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
+      setRemainingSeconds(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setTimeLeft('Süreniz doldu');
+          setApiError('15 dakikalık kayıt süreniz dolmuştur. Lütfen tekrar TC giriniz.');
+          setStep(1);
+          return 0;
+        }
+        const newSecs = prev - 1;
+        const m = Math.floor(newSecs / 60);
+        const s = Math.floor(newSecs % 60);
         setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
-      }
+        return newSecs;
+      });
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [lockExpiresAt, step]);
+  }, [remainingSeconds, step]);
 
   const {
     control,
@@ -148,8 +159,21 @@ export default function ApplicationForm({ onSubmitSuccess }) {
       const isAttendedBefore = !!data.is_attended_before;
       setAttendedBefore(isAttendedBefore);
 
-      if (data.status === 'locked' && data.lock_expires_at) {
-        setLockExpiresAt(new Date(data.lock_expires_at));
+      if (data.status === 'locked') {
+        if (data.lock_expires_at) {
+          setLockExpiresAt(new Date(data.lock_expires_at));
+        }
+        if (data.remaining_seconds !== undefined) {
+          setRemainingSeconds(data.remaining_seconds);
+          const m = Math.floor(data.remaining_seconds / 60);
+          const s = Math.floor(data.remaining_seconds % 60);
+          setTimeLeft(`${m}:${s.toString().padStart(2, '0')}`);
+        } else if (data.lock_expires_at) {
+          // Fallback if backend hasn't updated yet
+          const diff = new Date(data.lock_expires_at) - new Date();
+          const secs = Math.max(0, Math.floor(diff / 1000));
+          setRemainingSeconds(secs);
+        }
       }
 
       // If they already have an application process beyond "locked", retrieve email + OTP
@@ -544,7 +568,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         </form>
       ) : (
         <form onSubmit={handleSubmit(onValid, onInvalid)} noValidate>
-          {lockExpiresAt && timeLeft && !submissionStatus && (
+          {remainingSeconds > 0 && timeLeft && !submissionStatus && (
             <div className="mb-6 py-6 px-4 rounded-xl border-2 border-dpg-gold/60 bg-dpg-gold/10 text-dpg-gold text-center font-bold text-2xl flex flex-col items-center gap-3 shadow-[0_0_20px_rgba(230,194,117,0.2)] animate-pulse-slow">
               <span className="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
