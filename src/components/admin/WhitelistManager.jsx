@@ -44,7 +44,9 @@ export default function WhitelistManager() {
 
         setAdding(true);
         setAddStatus({ state: null, message: '' });
-        const { error } = await supabase.from('cf_whitelist').insert([{ tc_no: tcNo }]);
+
+        const cleanTcNo = tcNo.replace(/\D/g, '');
+        const { error } = await supabase.from('cf_whitelist').insert([{ tc_no: cleanTcNo }]);
         setAdding(false);
 
         if (error) {
