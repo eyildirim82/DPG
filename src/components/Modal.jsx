@@ -27,9 +27,10 @@ export default function Modal({ isOpen, onClose }) {
             <h3 className="font-heading text-dpg-gold text-2xl md:text-3xl mb-3 md:mb-4 font-normal uppercase tracking-wide">
               Başvurunuz Alınmıştır
             </h3>
-            <p className="text-dpg-text-muted font-light text-sm md:text-base mb-6 md:mb-8">
-              Kaydınız başarıyla oluşturulmuştur. Etkinlik detayları tarafınıza iletilecektir.
-            </p>
+            <div className="text-dpg-text-muted font-light text-sm md:text-base mb-6 md:mb-8 flex flex-col gap-2">
+              <p>Kaydınız başarıyla oluşturulmuştur. Etkinlik detayları tarafınıza iletilecektir.</p>
+              <p className="text-white">Başvurunuz Onayladıktan sonra Masa seçimi için <strong className="text-dpg-gold font-normal">TC Kimlik numaranızla</strong> giriş yapmanız gerekiyor.</p>
+            </div>
             <div className="flex flex-col gap-3 items-center mt-4">
               <Button secondary onClick={onClose} className="w-full md:w-auto min-h-[44px]">
                 Takvime Ekle
