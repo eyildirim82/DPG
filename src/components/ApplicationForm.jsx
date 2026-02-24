@@ -475,17 +475,17 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
       {/* Ücret ve başvuru tarihi vurgusu */}
       <div
-        className="border border-dpg-gold/60 rounded-sm py-4 px-4 md:py-5 md:px-6 mb-8 text-center"
+        className="border border-dpg-gold/60 rounded-sm py-4 px-4 md:py-6 md:px-8 mb-8 text-center"
         style={{ backgroundColor: 'rgba(230, 194, 117, 0.06)' }}
       >
-        <p className="font-heading text-dpg-gold text-lg md:text-xl font-semibold tracking-wide">
+        <p className="font-heading text-dpg-gold text-xl md:text-2xl font-semibold tracking-wide">
           Katılım ücreti: {bringGuest ? '6.000 TL (2 Kişi)' : '3.000 TL'}
         </p>
-        <p className="text-dpg-text-muted text-xs md:text-sm mt-1 font-body">
+        <p className="text-dpg-text-muted text-sm md:text-base mt-2 font-body">
           Başvuru açılış: 2 Mart 2026, 15:00
         </p>
         {quotaStats && (
-          <div className="mt-4 pt-4 border-t border-dpg-gold/20 flex flex-col md:flex-row justify-center items-center gap-4 text-sm font-body">
+          <div className="mt-5 pt-5 border-t border-dpg-gold/20 flex flex-col md:flex-row justify-center items-center gap-4 text-base md:text-lg font-body">
             <div className="text-dpg-silver">
               <span className="text-dpg-gold mr-1">Asil Kota (Dolu):</span>
               {quotaStats.asil_reserved} / {quotaStats.asil_capacity}
@@ -501,7 +501,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
       {apiError && (
         <div
-          className="mb-6 py-3 px-4 rounded border border-red-500/50 bg-red-500/10 text-red-400 text-sm font-body"
+          className="mb-6 py-4 px-5 rounded border border-red-500/50 bg-red-500/10 text-red-400 text-base md:text-lg font-body"
           role="alert"
         >
           {apiError}
@@ -527,18 +527,18 @@ export default function ApplicationForm({ onSubmitSuccess }) {
               label="TC Kimlik No"
               error={tcError}
             />
-            <p className="text-dpg-text-muted text-sm font-body mt-2 px-1">
+            <p className="text-dpg-text-muted text-base md:text-lg font-body mt-2 px-1">
               11 haneli TC Kimlik Numaranızı giriniz.
             </p>
           </div>
           <Button type="submit" className="w-full min-h-[48px] mt-2 mb-8" style={{ opacity: submitting ? 0.7 : 1 }}>
-            {submitting ? 'Sorgulanıyor...' : 'Devam'}
+            {submitting ? 'Sorgulanıyor...' : 'TC KİMLİK NUMARASINI DOĞRULA VE DEVAM ET'}
           </Button>
         </form>
       ) : step === 1.5 ? (
         <form onSubmit={handleOtpSubmit} noValidate>
           <div className="mb-8">
-            <p className="text-dpg-text-muted text-sm font-body mb-4 px-1 leading-relaxed">
+            <p className="text-dpg-text-muted text-base md:text-lg font-body mb-4 px-1 leading-relaxed">
               Katılım kaydınızdaki <strong className="text-dpg-gold">{maskedEmail}</strong> adresine gönderilen 8 haneli doğrulama kodunu giriniz. (E-postayı göremiyorsanız Gereksiz (Spam) kutusunu kontrol ediniz.)
             </p>
             <FormInput
@@ -566,9 +566,9 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         </form>
       ) : step === 3 ? (
         <form onSubmit={handleSeatingSubmit} noValidate>
-          <div className="mb-6 py-4 px-5 rounded border border-green-500/30 bg-green-500/10 text-green-100 text-sm font-body">
-            <h3 className="text-lg font-bold text-green-400 mb-2">Başvurunuz Onaylanmıştır!</h3>
-            <p className="text-base text-gray-200">Aşağıdaki oturma kümelerinden birini seçerek Gala alanındaki yerinizi belirtebilirsiniz. Arkadaşlarınızla aynı kümeyi seçerek yan yana oturabilirsiniz.</p>
+          <div className="mb-6 py-4 px-5 rounded border border-green-500/30 bg-green-500/10 text-green-100 text-base md:text-lg font-body">
+            <h3 className="text-xl md:text-2xl font-bold text-green-400 mb-2">Başvurunuz Onaylanmıştır!</h3>
+            <p className="text-lg text-gray-200">Aşağıdaki oturma kümelerinden birini seçerek Gala alanındaki yerinizi belirtebilirsiniz. Arkadaşlarınızla aynı kümeyi seçerek yan yana oturabilirsiniz.</p>
           </div>
 
           <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -595,11 +595,11 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                     </div>
                     <div className="flex-1">
                       <h4 className={`text-xl font-bold font-heading mb-1 ${selectedCluster === cluster.id ? 'text-dpg-gold' : 'text-gray-300'}`}>{cluster.name}</h4>
-                      <p className="text-sm font-body text-gray-400">{cluster.desc}</p>
+                      <p className="text-base md:text-lg font-body text-gray-400">{cluster.desc}</p>
                       {cluster.id !== 'Otomatik' && clusterStats.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-2">
                           {clusterStats.map((stat, idx) => (
-                            <span key={idx} className="bg-white/10 px-2 py-1 rounded text-xs text-gray-300 flex items-center gap-1">
+                            <span key={idx} className="bg-white/10 px-3 py-1.5 rounded text-sm md:text-base text-gray-300 flex items-center gap-2">
                               <span className="w-1.5 h-1.5 rounded-full bg-dpg-gold/70"></span>
                               {stat.airline}: {stat.count}
                             </span>
@@ -632,12 +632,12 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             </div>
           )}
 
-          <div className="mb-6 py-3 px-4 rounded border border-dpg-gold/30 bg-dpg-gold/5 text-dpg-text-muted text-xl font-body flex justify-between items-center">
+          <div className="mb-6 py-4 px-5 rounded border border-dpg-gold/30 bg-dpg-gold/5 text-dpg-text-muted text-xl font-body flex justify-between items-center">
             <span>TC Kimlik No: {(watch('tcNo') || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$2**$3*$4')}</span>
             <button
               type="button"
               onClick={() => { setStep(1); setTcInput(''); setValue('tcNo', ''); setAttendedBefore(false); setSubmissionStatus(null); setTicketType(null); }}
-              className="text-dpg-gold text-xs underline hover:no-underline"
+              className="text-dpg-gold text-base md:text-lg ml-4 underline hover:no-underline"
             >
               Değiştir
             </button>
@@ -646,21 +646,21 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           {(submissionStatus === 'approved' || submissionStatus === 'asil') ? (
             <div className="mb-6 py-4 px-5 rounded border border-green-500/50 bg-green-500/10 flex flex-col md:flex-row justify-between items-center gap-4">
               <div>
-                <strong className="block text-green-400 text-base mb-1">Başvurunuz Onaylanmıştır!</strong>
-                <span className="text-green-200 text-sm font-body">Masa düzeni tercihinizi yapmak için aşağıdaki butonu kullanabilirsiniz. Bilgilerinizi de aşağıdan güncelleyebilirsiniz.</span>
+                <strong className="block text-green-400 text-lg md:text-xl mb-1">Başvurunuz Onaylanmıştır!</strong>
+                <span className="text-green-200 text-base md:text-lg font-body">Masa düzeni tercihinizi yapmak için aşağıdaki butonu kullanabilirsiniz. Bilgilerinizi de aşağıdan güncelleyebilirsiniz.</span>
               </div>
               <Button type="button" onClick={() => setStep(3)} className="whitespace-nowrap min-h-[44px] bg-green-600 hover:bg-green-500 text-white">
                 Masa Seçimi
               </Button>
             </div>
           ) : submissionStatus ? (
-            <div className="mb-6 py-3 px-4 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-sm font-body">
+            <div className="mb-6 py-4 px-5 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-base md:text-lg font-body">
               <strong>Bilgilendirme:</strong> Başvurunuz daha önce başarıyla alınmıştır. Aşağıdaki formdan bilgilerinizi güncelleyebilirsiniz.
             </div>
           ) : null}
 
           {attendedBefore && (
-            <div className="mb-6 py-3 px-4 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-sm font-body">
+            <div className="mb-6 py-4 px-5 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-base md:text-lg font-body">
               <strong>Bilgilendirme:</strong> Geçmiş yıllardaki DPG etkinliklerimize katıldığınız tespit edilmiştir. Kurallar gereği başvurunuz yalnızca <strong>Yedek Liste</strong> üzerinden değerlendirilecektir.
             </div>
           )}
@@ -800,12 +800,12 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                         if (field.value) setValue('guestName', '');
                       }
                     }}
-                    className="w-5 h-5 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
+                    className="w-7 h-7 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
                     aria-checked={field.value}
                   >
-                    {field.value && <span className="w-2.5 h-2.5 bg-dpg-gold block" />}
+                    {field.value && <span className="w-4 h-4 bg-dpg-gold block" />}
                   </span>
-                  <span className="ml-4 text-sm font-body font-medium" style={{ color: theme.colors.gold }}>
+                  <span className="ml-4 text-base md:text-lg font-body font-medium" style={{ color: theme.colors.gold }}>
                     Yanımda bir misafir getirmek istiyorum (+1 Bilet)
                   </span>
                 </label>
@@ -868,15 +868,15 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                           field.onChange(!field.value);
                         }
                       }}
-                      className="w-5 h-5 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
+                      className="w-7 h-7 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
                       aria-checked={field.value}
                     >
                       {field.value && (
-                        <span className="w-2.5 h-2.5 bg-dpg-gold block" />
+                        <span className="w-4 h-4 bg-dpg-gold block" />
                       )}
                     </span>
                     <span
-                      className="ml-4 text-sm font-body font-medium"
+                      className="ml-4 text-base md:text-lg font-body font-medium"
                       style={{
                         color: errors.paymentApproval ? '#b91c1c' : theme.colors.textMuted,
                       }}

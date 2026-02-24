@@ -10,13 +10,13 @@ export default function Sponsor() {
       viewport={{ once: true, amount: 0.1 }}
       transition={{ duration: 0.6 }}
     >
-      <p className="uppercase tracking-[0.2em] mb-6 text-sm text-dpg-gold font-light">
+      <p className="uppercase tracking-[0.2em] mb-4 text-lg md:text-xl text-dpg-gold font-light">
         Ana Sponsor
       </p>
       <img
         src="/denizbank-logo.svg"
         alt="DenizBank"
-        className="h-28 md:h-40 w-auto object-contain mx-auto"
+        className="h-12 md:h-16 w-auto object-contain mx-auto"
       />
     </motion.section>
   );

@@ -32,7 +32,6 @@ const item = {
 
 export default function Hero({ onScrollTo }) {
   const videoRef = useRef(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(null);
   const [showPlayButton, setShowPlayButton] = useState(true);
 
@@ -65,7 +64,7 @@ export default function Hero({ onScrollTo }) {
 
       <motion.h1
         variants={item}
-        className="font-heading font-medium tracking-normal uppercase text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl leading-tight mb-4 md:mb-4 text-center"
+        className="font-heading font-medium tracking-normal uppercase text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl leading-tight mb-4 md:mb-4 text-center flex flex-col gap-2"
         style={{
           background: 'linear-gradient(to bottom, #E6C275, #9E8245)',
           WebkitBackgroundClip: 'text',
@@ -73,31 +72,22 @@ export default function Hero({ onScrollTo }) {
           backgroundClip: 'text',
         }}
       >
-        26 Nisan 2026
-        Dünya Pilotlar Günü
+        <span className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl">26 Nisan 2026</span>
+        <span>Dünya Pilotlar Günü</span>
       </motion.h1>
       <motion.div
         variants={item}
         className="w-full max-w-[1100px] mx-auto mb-4 md:mb-6 flex flex-col gap-4 md:gap-6"
       >
-        <div className="relative rounded overflow-hidden border border-dpg-gold-dim flex items-center justify-center w-full aspect-video max-h-[320px] sm:max-h-[380px] md:max-h-[420px] bg-dpg-navy"
+        <div className="relative rounded overflow-hidden border border-dpg-gold-dim flex items-center justify-center w-full aspect-video max-h-[320px] sm:max-h-[380px] md:max-h-[420px] bg-dpg-navy mt-4 md:mt-6"
         >
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 transition-opacity duration-300 pointer-events-none bg-dpg-navy"
-            style={{ opacity: videoLoaded ? 0 : 1 }}
-            aria-live="polite"
-            aria-busy={!videoLoaded}
-          >
-            <img src="/talpa-logo.webp" alt="TALPA" className="h-28 md:h-36 w-auto object-contain opacity-90" />
-            <span className="text-dpg-text-muted font-body text-sm">Yükleniyor...</span>
-          </div>
           {videoError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-20 bg-dpg-navy p-4">
               <img src="/talpa-logo.webp" alt="TALPA" className="h-24 md:h-28 w-auto object-contain opacity-80" />
               <p className="text-dpg-text-muted text-sm text-center">{videoError}</p>
             </div>
           )}
-          {showPlayButton && videoLoaded && !videoError && (
+          {showPlayButton && !videoError && (
             <button
               type="button"
               onClick={handlePlayClick}
@@ -118,8 +108,6 @@ export default function Hero({ onScrollTo }) {
             controlsList="nodownload"
             playsInline
             preload="metadata"
-            onLoadedData={() => { setVideoLoaded(true); setVideoError(null); }}
-            onCanPlay={() => setVideoLoaded(true)}
             onPlay={() => setShowPlayButton(false)}
             onPause={() => setShowPlayButton(true)}
             onError={(e) => {
@@ -131,22 +119,25 @@ export default function Hero({ onScrollTo }) {
             Tarayıcınız video oynatmayı desteklemiyor.
           </video>
         </div>
-        <div className="flex flex-col gap-6 max-w-[600px] mx-auto w-full">
-          <div className="text-base md:text-lg border-l border-dpg-gold pl-4 md:pl-6 text-left text-dpg-text-muted font-light flex flex-col gap-4">
+
+        <div className="flex flex-col gap-6 max-w-[700px] mx-auto w-full mt-4 md:mt-8">
+          <div className="text-xl md:text-2xl leading-relaxed border-l border-dpg-gold pl-4 md:pl-6 text-left text-dpg-text-muted font-light flex flex-col gap-4">
             <p>
               Gökyüzünün kahramanları bir araya geliyor!
             </p>
             <p>
-              Gökyüzüne adanmış bir ömrün, fedakârlığın, disiplinin ve tutkunun ortak adı; Dünya Pilotlar Günü.
+              Gökyüzüne adanmış bir ömrün, fedakârlığın, disiplinin ve tutkunun ortak adı;
+              <br />
+              <strong className="text-dpg-gold text-2xl md:text-3xl font-medium mt-1 inline-block">Dünya Pilotlar Günü.</strong>
             </p>
-            <p>
+            <p className="text-base md:text-lg">
               Türkiye’nin ilk pilotu Fesa Evrensev’in 26 Nisan’da gerçekleştirdiği kabul edilen ilk uçuş, bugün tüm dünyada Dünya Pilotlar Günü olarak kutlanmaktadır. Bu tarih; cesaretin, vizyonun ve öncülüğün sembolüdür.
             </p>
-            <p>
+            <p className="font-medium mt-1 md:mt-2 text-lg md:text-xl">
               Bu özel günü TALPA öncülüğünde hep birlikte kutluyoruz!
             </p>
           </div>
-          <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] self-center">Etkinliğe Başvur</Button>
+          <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] self-center items-center justify-center flex mt-2 md:mt-4">Etkinliğe Başvur</Button>
         </div>
       </motion.div>
 

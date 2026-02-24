@@ -36,9 +36,8 @@ export default function PublicPage() {
             <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8 relative z-[2]">
                 <Header />
                 <Hero onScrollTo={scrollTo} />
-
-                <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
                 <Sponsor />
+                <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
                 <Footer />
             </div>
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} isUpdate={isUpdate} />
