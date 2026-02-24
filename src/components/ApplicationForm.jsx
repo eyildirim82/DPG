@@ -484,27 +484,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         <p className="text-dpg-text-muted text-sm md:text-base mt-2 font-body">
           Başvuru açılış: 2 Mart 2026, 15:00
         </p>
-        {quotaStats && (
-          <div className="mt-5 pt-5 border-t border-dpg-gold/20 flex flex-col gap-3 text-base md:text-lg font-body">
-            <div className="flex flex-col md:flex-row justify-center items-center gap-4">
-              <div className="text-dpg-silver">
-                <span className="text-dpg-gold mr-1">Asil (Eski Katılımcı):</span>
-                {quotaStats.asil_returning_reserved || 0} / {quotaStats.asil_returning_capacity || 400}
-              </div>
-              <div className="hidden md:block w-px h-4 bg-dpg-gold/30"></div>
-              <div className="text-dpg-silver">
-                <span className="text-dpg-gold mr-1">Asil (Yeni Katılımcı):</span>
-                {quotaStats.asil_new_reserved || 0} / {quotaStats.asil_new_capacity || 300}
-              </div>
-            </div>
-            <div className="flex justify-center items-center">
-              <div className="text-dpg-silver text-sm">
-                <span className="text-dpg-gold/70 mr-1">Toplam:</span>
-                {quotaStats.total_reserved || 0} / {quotaStats.total_capacity || 1500}
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
 
       {apiError && (
