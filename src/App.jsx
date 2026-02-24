@@ -6,6 +6,7 @@ import Dashboard from './components/admin/Dashboard';
 import SubmissionsList from './components/admin/SubmissionsList';
 import WhitelistManager from './components/admin/WhitelistManager';
 import CommunicationManager from './components/admin/CommunicationManager';
+import QuotaSettings from './components/admin/QuotaSettings';
 import AdminLogin from './components/admin/AdminLogin';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import DynamicFormPage from './pages/DynamicFormPage';
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="whitelist" element={<WhitelistManager />} />
             <Route path="submissions" element={<SubmissionsList />} />
             <Route path="communication" element={<CommunicationManager />} />
+            <Route path="quota" element={<QuotaSettings />} />
           </Route>
         </Route>
       </Routes>

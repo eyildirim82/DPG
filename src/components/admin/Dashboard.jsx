@@ -11,6 +11,10 @@ export default function Dashboard() {
         quotaAsil: 700,
         quotaTotal: 1500,
         reservedTotal: 0,
+        asilReturningCapacity: 400,
+        asilReturningReserved: 0,
+        asilNewCapacity: 300,
+        asilNewReserved: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -40,6 +44,10 @@ export default function Dashboard() {
                     reservedTotal: quotaData?.total_reserved || 0,
                     quotaAsil: quotaData?.asil_capacity || 700,
                     quotaTotal: quotaData?.total_capacity || 1500,
+                    asilReturningCapacity: quotaData?.asil_returning_capacity || 400,
+                    asilReturningReserved: quotaData?.asil_returning_reserved || 0,
+                    asilNewCapacity: quotaData?.asil_new_capacity || 300,
+                    asilNewReserved: quotaData?.asil_new_reserved || 0,
                 });
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);
@@ -71,27 +79,42 @@ export default function Dashboard() {
             ) : (
                 <>
                     {/* Quota Highlights */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        {/* Asil - Eski Katılımcı */}
                         <div className="bg-gradient-to-br from-dpg-navy to-blue-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
                             <Ticket className="absolute right-4 bottom-4 w-24 h-24 text-white opacity-10" />
-                            <h3 className="text-blue-200 text-sm font-medium mb-1 uppercase tracking-wider">Asil Kota Doluluk</h3>
+                            <h3 className="text-blue-200 text-xs font-medium mb-1 uppercase tracking-wider">Asil — Eski Katılımcı</h3>
                             <div className="flex items-end gap-3">
-                                <span className="text-4xl font-bold">{Math.min(stats.reservedTotal, stats.quotaAsil)}</span>
-                                <span className="text-xl text-blue-200 mb-1">/ {stats.quotaAsil}</span>
+                                <span className="text-3xl font-bold">{stats.asilReturningReserved}</span>
+                                <span className="text-lg text-blue-200 mb-0.5">/ {stats.asilReturningCapacity}</span>
                             </div>
-                            <div className="w-full bg-blue-950/50 rounded-full h-2 mt-4">
-                                <div className="bg-dpg-gold h-2 rounded-full" style={{ width: `${Math.min(100, (Math.min(stats.reservedTotal, stats.quotaAsil) / stats.quotaAsil) * 100)}%` }}></div>
+                            <div className="w-full bg-blue-950/50 rounded-full h-2 mt-3">
+                                <div className="bg-dpg-gold h-2 rounded-full" style={{ width: `${Math.min(100, (stats.asilReturningReserved / stats.asilReturningCapacity) * 100)}%` }}></div>
                             </div>
                         </div>
 
+                        {/* Asil - Yeni Katılımcı */}
+                        <div className="bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+                            <Ticket className="absolute right-4 bottom-4 w-24 h-24 text-white opacity-10" />
+                            <h3 className="text-emerald-200 text-xs font-medium mb-1 uppercase tracking-wider">Asil — Yeni Katılımcı</h3>
+                            <div className="flex items-end gap-3">
+                                <span className="text-3xl font-bold">{stats.asilNewReserved}</span>
+                                <span className="text-lg text-emerald-200 mb-0.5">/ {stats.asilNewCapacity}</span>
+                            </div>
+                            <div className="w-full bg-emerald-950/50 rounded-full h-2 mt-3">
+                                <div className="bg-emerald-400 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.asilNewReserved / stats.asilNewCapacity) * 100)}%` }}></div>
+                            </div>
+                        </div>
+
+                        {/* Toplam Kota */}
                         <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
                             <Users className="absolute right-4 bottom-4 w-24 h-24 text-white opacity-5" />
-                            <h3 className="text-slate-300 text-sm font-medium mb-1 uppercase tracking-wider">Toplam Kota (Asil + Yedek)</h3>
+                            <h3 className="text-slate-300 text-xs font-medium mb-1 uppercase tracking-wider">Toplam Kota (Asil + Yedek)</h3>
                             <div className="flex items-end gap-3">
-                                <span className="text-4xl font-bold">{stats.reservedTotal}</span>
-                                <span className="text-xl text-slate-400 mb-1">/ {stats.quotaTotal}</span>
+                                <span className="text-3xl font-bold">{stats.reservedTotal}</span>
+                                <span className="text-lg text-slate-400 mb-0.5">/ {stats.quotaTotal}</span>
                             </div>
-                            <div className="w-full bg-slate-950/50 rounded-full h-2 mt-4">
+                            <div className="w-full bg-slate-950/50 rounded-full h-2 mt-3">
                                 <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.reservedTotal / stats.quotaTotal) * 100)}%` }}></div>
                             </div>
                         </div>

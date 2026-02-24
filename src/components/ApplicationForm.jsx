@@ -485,15 +485,23 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           Başvuru açılış: 2 Mart 2026, 15:00
         </p>
         {quotaStats && (
-          <div className="mt-5 pt-5 border-t border-dpg-gold/20 flex flex-col md:flex-row justify-center items-center gap-4 text-base md:text-lg font-body">
-            <div className="text-dpg-silver">
-              <span className="text-dpg-gold mr-1">Asil Kota (Dolu):</span>
-              {quotaStats.asil_reserved} / {quotaStats.asil_capacity}
+          <div className="mt-5 pt-5 border-t border-dpg-gold/20 flex flex-col gap-3 text-base md:text-lg font-body">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-4">
+              <div className="text-dpg-silver">
+                <span className="text-dpg-gold mr-1">Asil (Eski Katılımcı):</span>
+                {quotaStats.asil_returning_reserved || 0} / {quotaStats.asil_returning_capacity || 400}
+              </div>
+              <div className="hidden md:block w-px h-4 bg-dpg-gold/30"></div>
+              <div className="text-dpg-silver">
+                <span className="text-dpg-gold mr-1">Asil (Yeni Katılımcı):</span>
+                {quotaStats.asil_new_reserved || 0} / {quotaStats.asil_new_capacity || 300}
+              </div>
             </div>
-            <div className="hidden md:block w-px h-4 bg-dpg-gold/30"></div>
-            <div className="text-dpg-silver">
-              <span className="text-dpg-gold mr-1">Yedek Kota (Dolu):</span>
-              {quotaStats.yedek_reserved} / {quotaStats.yedek_capacity}
+            <div className="flex justify-center items-center">
+              <div className="text-dpg-silver text-sm">
+                <span className="text-dpg-gold/70 mr-1">Toplam:</span>
+                {quotaStats.total_reserved || 0} / {quotaStats.total_capacity || 1500}
+              </div>
             </div>
           </div>
         )}
@@ -661,7 +669,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
           {attendedBefore && (
             <div className="mb-6 py-4 px-5 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-base md:text-lg font-body">
-              <strong>Bilgilendirme:</strong> Geçmiş yıllardaki DPG etkinliklerimize katıldığınız tespit edilmiştir. Kurallar gereği başvurunuz yalnızca <strong>Yedek Liste</strong> üzerinden değerlendirilecektir.
+              <strong>Bilgilendirme:</strong> Geçmiş yıllardaki DPG etkinliklerimize katıldığınız tespit edilmiştir. Başvurunuz <strong>Eski Katılımcı Asil Kotası</strong> üzerinden değerlendirilecektir.
             </div>
           )}
 
