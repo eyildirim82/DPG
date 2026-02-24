@@ -73,7 +73,8 @@ export default function Hero({ onScrollTo }) {
           backgroundClip: 'text',
         }}
       >
-        Dünya Pilotlar Günü 2026
+        26 Nisan 2026
+        Dünya Pilotlar Günü
       </motion.h1>
       <motion.div
         variants={item}
@@ -131,15 +132,20 @@ export default function Hero({ onScrollTo }) {
           </video>
         </div>
         <div className="flex flex-col gap-6 max-w-[600px] mx-auto w-full">
-          <p className="text-base md:text-lg border-l border-dpg-gold pl-4 md:pl-6 text-left text-dpg-text-muted font-light">
-            Gökyüzünün kahramanları bir araya geliyor.
-
-            Gökyüzüne adanmış bir ömrün, fedakârlığın, disiplinin ve tutkunun ortak adı; Dünya Pilotlar Günü.
-
-            Türkiye’nin ilk pilotu Fesa Evrensev’in 26 Nisan’da gerçekleştirdiği kabul edilen ilk uçuş, bugün tüm dünyada Dünya Pilotlar Günü olarak kutlanmaktadır. Bu tarih; cesaretin, vizyonun ve öncülüğün sembolüdür.
-
-            Bu özel günü TALPA öncülüğünde hep birlikte kutluyoruz!
-          </p>
+          <div className="text-base md:text-lg border-l border-dpg-gold pl-4 md:pl-6 text-left text-dpg-text-muted font-light flex flex-col gap-4">
+            <p>
+              Gökyüzünün kahramanları bir araya geliyor!
+            </p>
+            <p>
+              Gökyüzüne adanmış bir ömrün, fedakârlığın, disiplinin ve tutkunun ortak adı; Dünya Pilotlar Günü.
+            </p>
+            <p>
+              Türkiye’nin ilk pilotu Fesa Evrensev’in 26 Nisan’da gerçekleştirdiği kabul edilen ilk uçuş, bugün tüm dünyada Dünya Pilotlar Günü olarak kutlanmaktadır. Bu tarih; cesaretin, vizyonun ve öncülüğün sembolüdür.
+            </p>
+            <p>
+              Bu özel günü TALPA öncülüğünde hep birlikte kutluyoruz!
+            </p>
+          </div>
           <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] self-center">Etkinliğe Başvur</Button>
         </div>
       </motion.div>
