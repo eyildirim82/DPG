@@ -138,17 +138,7 @@ export default function Hero({ onScrollTo }) {
           <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] self-center">Etkinliğe Başvur</Button>
         </div>
       </motion.div>
-      <motion.div
-        variants={item}
-        className="mt-6 md:mt-10 opacity-90 text-xs md:text-sm tracking-widest text-dpg-silver flex flex-col items-center gap-2 md:gap-3"
-      >
-        ANA SPONSOR
-        <img
-          src="/denizbank-logo.svg"
-          alt="DenizBank"
-          className="h-28 md:h-40 w-auto object-contain"
-        />
-      </motion.div>
+
     </motion.section>
   );
 }
