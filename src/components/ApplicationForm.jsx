@@ -389,7 +389,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         return;
       }
 
-      onSubmitSuccess?.();
+      onSubmitSuccess?.(!!submissionStatus);
       reset(defaultValues);
       setStep(1);
       setTcInput('');
@@ -602,7 +602,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             <div className="mb-6 py-4 px-5 rounded border border-green-500/50 bg-green-500/10 flex flex-col md:flex-row justify-between items-center gap-4">
               <div>
                 <strong className="block text-green-400 text-base mb-1">Başvurunuz Onaylanmıştır!</strong>
-                <span className="text-green-200 text-sm font-body">Bilgilerinizi aşağıdan güncelleyebilir veya devam edip masa düzeni tercihinizi yapabilirsiniz.</span>
+                <span className="text-green-200 text-sm font-body">Masa düzeni tercihinizi yapmak için aşağıdaki butonu kullanabilirsiniz. Bilgilerinizi de aşağıdan güncelleyebilirsiniz.</span>
               </div>
               <Button type="button" onClick={() => setStep(3)} className="whitespace-nowrap min-h-[44px] bg-green-600 hover:bg-green-500 text-white">
                 Masa Seçimi
@@ -610,7 +610,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             </div>
           ) : submissionStatus ? (
             <div className="mb-6 py-3 px-4 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-sm font-body">
-              <strong>Bilgilendirme:</strong> Daha önce oluşturduğunuz başvuru formunu görüntülüyorsunuz. Aşağıdan bilgilerinizi güncelleyebilirsiniz.
+              <strong>Bilgilendirme:</strong> Başvurunuz daha önce başarıyla alınmıştır. Aşağıdaki formdan bilgilerinizi güncelleyebilirsiniz.
             </div>
           ) : null}
 
@@ -850,7 +850,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           </div>
 
           <Button type="submit" className="w-full" style={{ opacity: submitting || deleting ? 0.7 : 1 }} disabled={submitting || deleting}>
-            {submitting ? 'İşleniyor...' : ticketType === 'asil' ? 'Katılımımı Onayla (ASİL)' : ticketType === 'yedek' ? 'Katılımımı Onayla (YEDEK)' : 'Katılımımı Onayla'}
+            {submitting ? 'İşleniyor...' : submissionStatus ? 'Bilgilerimi Güncelle' : ticketType === 'asil' ? 'Katılımımı Onayla (ASİL)' : ticketType === 'yedek' ? 'Katılımımı Onayla (YEDEK)' : 'Katılımımı Onayla'}
           </Button>
 
           {submissionStatus && submissionStatus !== 'cancelled' && (

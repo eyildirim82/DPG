@@ -9,6 +9,7 @@ import Modal from '../components/Modal';
 
 export default function PublicPage() {
     const [modalOpen, setModalOpen] = useState(false);
+    const [isUpdate, setIsUpdate] = useState(false);
 
     const scrollTo = useCallback((id) => {
         const el = document.getElementById(id);
@@ -35,10 +36,10 @@ export default function PublicPage() {
                 <Header />
                 <Hero onScrollTo={scrollTo} />
 
-                <ApplicationForm onSubmitSuccess={() => setModalOpen(true)} />
+                <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
                 <Footer />
             </div>
-            <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+            <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} isUpdate={isUpdate} />
         </div>
     );
 }
