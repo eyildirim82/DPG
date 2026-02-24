@@ -143,7 +143,7 @@ export default function QuotaSettings() {
                             min="0"
                             value={settings.asil_returning_capacity}
                             onChange={(e) => setSettings({ ...settings, asil_returning_capacity: parseInt(e.target.value) || 0 })}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold text-center bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
                     <div>
@@ -156,7 +156,7 @@ export default function QuotaSettings() {
                             min="0"
                             value={settings.asil_new_capacity}
                             onChange={(e) => setSettings({ ...settings, asil_new_capacity: parseInt(e.target.value) || 0 })}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold text-center bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
                     <div>
@@ -169,7 +169,7 @@ export default function QuotaSettings() {
                             min="0"
                             value={settings.total_capacity}
                             onChange={(e) => setSettings({ ...settings, total_capacity: parseInt(e.target.value) || 0 })}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold text-center bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
                 </div>
@@ -185,8 +185,8 @@ export default function QuotaSettings() {
                         onClick={handleSave}
                         disabled={saving || !hasChanges || asilTotal > settings.total_capacity}
                         className={`flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-all ${hasChanges && asilTotal <= settings.total_capacity
-                                ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                                : 'bg-gray-300 cursor-not-allowed'
+                            ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                            : 'bg-gray-300 cursor-not-allowed'
                             }`}
                     >
                         <Save className="w-4 h-4" />
@@ -202,15 +202,6 @@ export default function QuotaSettings() {
                 </div>
             </div>
 
-            {/* Computed info */}
-            <div className="bg-gray-50 rounded-xl p-5 border border-gray-100 text-sm text-gray-600">
-                <h4 className="font-semibold text-gray-800 mb-2">📋 Hesaplanan Değerler</h4>
-                <ul className="space-y-1">
-                    <li>• Toplam Asil Kota: <strong>{asilTotal}</strong> ({settings.asil_returning_capacity} eski + {settings.asil_new_capacity} yeni)</li>
-                    <li>• Yedek Kota: <strong>{yedekCapacity}</strong> ({settings.total_capacity} toplam − {asilTotal} asil)</li>
-                    <li>• Genel Toplam: <strong>{settings.total_capacity}</strong></li>
-                </ul>
-            </div>
         </div>
     );
 }
