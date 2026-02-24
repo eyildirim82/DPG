@@ -68,6 +68,23 @@ export default function SubmissionsList() {
         }
     };
 
+    // E-posta bildirimi gönderen yardımcı fonksiyon
+    const sendNotificationEmail = async (emailType, recipient, extraData = {}) => {
+        if (!recipient.email) return;
+        try {
+            const { error } = await supabase.functions.invoke('send-bulk-email', {
+                body: {
+                    email_type: emailType,
+                    recipients: [{ email: recipient.email, name: recipient.name }],
+                    extra_data: extraData
+                }
+            });
+            if (error) console.error('Bildirim e-postası hatası:', error);
+        } catch (err) {
+            console.error('E-posta gönderilemedi:', err);
+        }
+    };
+
     const handleStatusChangeClick = (id, newStatus, tcNo) => {
         setConfirmModal({
             isOpen: true,
@@ -86,6 +103,15 @@ export default function SubmissionsList() {
         } else {
             setSubmissions(submissions.map(sub => sub.id === id ? { ...sub, status: newStatus } : sub));
             await logAdminAction('STATUS_CHANGE', tcNo, oldSub?.status || 'pending', newStatus);
+
+            // Bildirim e-postası gönder
+            const emailTypeMap = { approved: 'status_approved', rejected: 'status_rejected', cancelled: 'status_cancelled' };
+            if (emailTypeMap[newStatus] && oldSub) {
+                sendNotificationEmail(emailTypeMap[newStatus], {
+                    email: oldSub.data?.email,
+                    name: oldSub.data?.name || oldSub.full_name || ''
+                }, { ticket_type: oldSub.ticket_type });
+            }
         }
         setConfirmModal({ isOpen: false, type: null, payload: null });
     };
@@ -108,6 +134,14 @@ export default function SubmissionsList() {
         } else {
             setSubmissions(submissions.map(sub => sub.id === id ? { ...sub, ticket_type: newType } : sub));
             await logAdminAction('TICKET_TYPE_CHANGE', tcNo, oldSub?.ticket_type || '', newType);
+
+            // Bildirim e-postası gönder
+            if (oldSub) {
+                sendNotificationEmail('ticket_type_change', {
+                    email: oldSub.data?.email,
+                    name: oldSub.data?.name || oldSub.full_name || ''
+                }, { old_type: oldSub.ticket_type, new_type: newType });
+            }
         }
         setConfirmModal({ isOpen: false, type: null, payload: null });
     };
@@ -122,13 +156,22 @@ export default function SubmissionsList() {
 
     const executePaymentStatusUpdate = async () => {
         const { id, tcNo, oldStatus, newStatus } = confirmModal.payload;
+        const sub = submissions.find(s => s.id === id);
         const { error } = await supabase.from('cf_submissions').update({ payment_status: newStatus }).eq('id', id);
         if (error) {
             alert('Ödeme durumu güncellenirken hata oluştu.');
             console.error(error);
         } else {
-            setSubmissions(submissions.map(sub => sub.id === id ? { ...sub, payment_status: newStatus } : sub));
+            setSubmissions(submissions.map(s => s.id === id ? { ...s, payment_status: newStatus } : s));
             await logAdminAction('PAYMENT_CHANGE', tcNo, oldStatus || 'pending', newStatus);
+
+            // Ödeme onaylandığında bildirim gönder
+            if (newStatus === 'paid' && sub) {
+                sendNotificationEmail('payment_confirmed', {
+                    email: sub.data?.email,
+                    name: sub.data?.name || sub.full_name || ''
+                });
+            }
         }
         setConfirmModal({ isOpen: false, type: null, payload: null });
     };

@@ -132,8 +132,13 @@ export default function Hero({ onScrollTo }) {
         </div>
         <div className="flex flex-col gap-6 max-w-[600px] mx-auto w-full">
           <p className="text-base md:text-lg border-l border-dpg-gold pl-4 md:pl-6 text-left text-dpg-text-muted font-light">
-            Gökyüzünün kahramanları bir araya geliyor. TALPA öncülüğünde, havacılık tarihine saygı ve
-            geleceğe vizyoner bir bakış.
+            Gökyüzünün kahramanları bir araya geliyor.
+
+            Gökyüzüne adanmış bir ömrün, fedakârlığın, disiplinin ve tutkunun ortak adı; Dünya Pilotlar Günü.
+
+            Türkiye’nin ilk pilotu Fesa Evrensev’in 26 Nisan’da gerçekleştirdiği kabul edilen ilk uçuş, bugün tüm dünyada Dünya Pilotlar Günü olarak kutlanmaktadır. Bu tarih; cesaretin, vizyonun ve öncülüğün sembolüdür.
+
+            Bu özel günü TALPA öncülüğünde hep birlikte kutluyoruz!
           </p>
           <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] self-center">Etkinliğe Başvur</Button>
         </div>

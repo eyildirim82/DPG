@@ -405,6 +405,35 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         return;
       }
 
+      // Başvuru alındı bildirimi gönder (arka planda, hata olsa bile form akışını bozma)
+      try {
+        // Kullanıcıya bildirim
+        supabase.functions.invoke('send-bulk-email', {
+          body: {
+            email_type: 'application_received',
+            recipients: [{ email: formData.email, name: formData.name }],
+            extra_data: { ticket_type: ticketType || 'yedek' }
+          }
+        }).catch(err => console.error('Kullanıcı bildirim hatası:', err));
+
+        // Admin'e bildirim
+        supabase.functions.invoke('send-bulk-email', {
+          body: {
+            email_type: 'admin_new_application',
+            recipients: [{ email: '__ADMIN__', name: 'Admin' }],
+            extra_data: {
+              name: formData.name,
+              tc_no: formData.tcNo?.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$3**'),
+              airline: formData.airline || '-',
+              ticket_type: ticketType || 'yedek',
+              has_guest: formData.bringGuest
+            }
+          }
+        }).catch(err => console.error('Admin bildirim hatası:', err));
+      } catch (emailErr) {
+        console.error('Bildirim e-postaları gönderilemedi:', emailErr);
+      }
+
       onSubmitSuccess?.(!!submissionStatus);
       reset(defaultValues);
       setStep(1);
