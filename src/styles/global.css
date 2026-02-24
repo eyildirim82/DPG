@@ -40,7 +40,23 @@ body {
   background: var(--color-gold-dim);
 }
 
-select option {
+/* Dark select options only for public pages (not admin) */
+:not(.admin-panel) > select option {
   background: var(--color-bg);
   color: var(--color-text);
+}
+
+/* Admin panel form element fixes */
+.admin-panel select,
+.admin-panel input,
+.admin-panel textarea {
+  background-color: #fff !important;
+  color: #111827 !important;
+  -webkit-appearance: auto;
+  appearance: auto;
+}
+
+.admin-panel select option {
+  background-color: #fff;
+  color: #111827;
 }
