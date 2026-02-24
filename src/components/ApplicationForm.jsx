@@ -41,6 +41,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   const [timeLeft, setTimeLeft] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [tableStats, setTableStats] = useState([]);
+  const [cancelToken, setCancelToken] = useState(() => localStorage.getItem('dpg_cancel_token') || null);
   const firstErrorRef = useRef(null);
 
   useEffect(() => {
@@ -166,6 +167,10 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         }
         if (data.ticket_type) {
           setTicketType(data.ticket_type);
+        }
+        if (data.cancel_token) {
+          setCancelToken(data.cancel_token);
+          localStorage.setItem('dpg_cancel_token', data.cancel_token);
         }
         if (data.remaining_seconds !== undefined) {
           setRemainingSeconds(data.remaining_seconds);
@@ -343,7 +348,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
       const tc = watch('tcNo');
       const { data, error } = await supabase.rpc('cancel_application', {
         p_tc_no: tc,
-        p_user_id: session.user.id
+        p_cancel_token: cancelToken
       });
 
       if (error || !data?.success) {
@@ -356,6 +361,8 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         setSubmissionStatus(null);
         setTicketType(null);
         setAttendedBefore(false);
+        setCancelToken(null);
+        localStorage.removeItem('dpg_cancel_token');
       }
     } catch (err) {
       console.error(err);
