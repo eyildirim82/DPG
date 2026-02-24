@@ -146,7 +146,7 @@ export default function Hero({ onScrollTo }) {
         <img
           src="/denizbank-logo.svg"
           alt="DenizBank"
-          className="h-20 md:h-28 w-auto object-contain"
+          className="h-28 md:h-40 w-auto object-contain"
         />
       </motion.div>
     </motion.section>

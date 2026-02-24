@@ -19,7 +19,7 @@ export default function Sponsor() {
         <img
           src="/denizbank-logo.svg"
           alt="DenizBank"
-          className="h-20 md:h-28 w-auto object-contain mx-auto mb-4 md:mb-6"
+          className="h-28 md:h-40 w-auto object-contain mx-auto mb-4 md:mb-6"
         />
         <p className="italic text-dpg-silver font-light text-sm md:text-base">
           &quot;Gökyüzünde güvenle yol alan tüm pilotlarımızın yanındayız. 2026 Dünya Pilotlar
