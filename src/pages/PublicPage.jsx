@@ -4,6 +4,7 @@ import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import Hero from '../components/Hero';
 
+import Sponsor from '../components/Sponsor';
 import ApplicationForm from '../components/ApplicationForm';
 import Modal from '../components/Modal';
 
@@ -37,6 +38,7 @@ export default function PublicPage() {
                 <Hero onScrollTo={scrollTo} />
 
                 <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
+                <Sponsor />
                 <Footer />
             </div>
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} isUpdate={isUpdate} />
