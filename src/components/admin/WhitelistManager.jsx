@@ -140,16 +140,37 @@ export default function WhitelistManager() {
                         return;
                     }
 
+                    // 1. Önce yüklenecek TC'lerin veritabanındaki MEVCUT durumlarını çekiyoruz.
+                    const { data: existingRecords } = await supabase
+                        .from('cf_whitelist')
+                        .select('tc_no, attended_before, is_debtor')
+                        .in('tc_no', uniqueTcs);
+
+                    const existingMap = new Map();
+                    if (existingRecords) {
+                        existingRecords.forEach(r => existingMap.set(r.tc_no, r));
+                    }
+
+                    // 2. Mevcut durum ile yeni durumu akıllıca birleştiriyoruz.
                     const payload = uniqueTcs.map(tc => {
-                        let attended_before = false;
-                        let is_debtor = false;
-                        if (uploadCategory === 'attended') attended_before = true;
-                        if (uploadCategory === 'debtor') is_debtor = true;
+                        const existing = existingMap.get(tc) || { attended_before: false, is_debtor: false };
+
+                        let updated_attended = existing.attended_before;
+                        let updated_debtor = existing.is_debtor;
+
+                        // SADECE seçilen kategoriye göre işlem yap, diğerine dokunma!
+                        if (uploadCategory === 'attended') {
+                            updated_attended = true;
+                        } else if (uploadCategory === 'debtor') {
+                            updated_debtor = true;
+                        } else if (uploadCategory === 'whitelist') {
+                            updated_debtor = false;
+                        }
 
                         return {
                             tc_no: tc,
-                            attended_before,
-                            is_debtor
+                            attended_before: updated_attended,
+                            is_debtor: updated_debtor
                         };
                     });
 

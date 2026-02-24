@@ -52,42 +52,104 @@ export default function SubmissionsList() {
         setLoading(false);
     };
 
-    const handleStatusChangeClick = (id, newStatus) => {
+    // Admin işlemlerini veritabanına kaydeden yardımcı fonksiyon
+    const logAdminAction = async (actionType, targetTc, oldValue, newValue) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            await supabase.from('cf_audit_logs').insert([{
+                admin_email: user?.email || 'Bilinmeyen Admin',
+                action_type: actionType,
+                target_tc: targetTc,
+                old_value: String(oldValue),
+                new_value: String(newValue)
+            }]);
+        } catch (err) {
+            console.error('Log kaydedilemedi:', err);
+        }
+    };
+
+    const handleStatusChangeClick = (id, newStatus, tcNo) => {
         setConfirmModal({
             isOpen: true,
             type: 'single_status',
-            payload: { id, newStatus }
+            payload: { id, newStatus, tcNo }
         });
     };
 
     const executeStatusUpdate = async () => {
-        const { id, newStatus } = confirmModal.payload;
+        const { id, newStatus, tcNo } = confirmModal.payload;
+        const oldSub = submissions.find(s => s.id === id);
         const { error } = await supabase.from('cf_submissions').update({ status: newStatus }).eq('id', id);
         if (error) {
             alert('Durum güncellenirken hata oluştu.');
             console.error(error);
         } else {
             setSubmissions(submissions.map(sub => sub.id === id ? { ...sub, status: newStatus } : sub));
+            await logAdminAction('STATUS_CHANGE', tcNo, oldSub?.status || 'pending', newStatus);
         }
         setConfirmModal({ isOpen: false, type: null, payload: null });
     };
 
-    const handleDeleteClick = (id, info) => {
+    const handleTicketTypeChangeClick = (id, newType, tcNo) => {
+        setConfirmModal({
+            isOpen: true,
+            type: 'single_ticket_type',
+            payload: { id, newType, tcNo }
+        });
+    };
+
+    const executeTicketTypeUpdate = async () => {
+        const { id, newType, tcNo } = confirmModal.payload;
+        const oldSub = submissions.find(s => s.id === id);
+        const { error } = await supabase.from('cf_submissions').update({ ticket_type: newType }).eq('id', id);
+        if (error) {
+            alert('Bilet tipi güncellenirken hata oluştu.');
+            console.error(error);
+        } else {
+            setSubmissions(submissions.map(sub => sub.id === id ? { ...sub, ticket_type: newType } : sub));
+            await logAdminAction('TICKET_TYPE_CHANGE', tcNo, oldSub?.ticket_type || '', newType);
+        }
+        setConfirmModal({ isOpen: false, type: null, payload: null });
+    };
+
+    const handlePaymentStatusChangeClick = (id, tcNo, oldStatus, newStatus) => {
+        setConfirmModal({
+            isOpen: true,
+            type: 'single_payment',
+            payload: { id, tcNo, oldStatus, newStatus }
+        });
+    };
+
+    const executePaymentStatusUpdate = async () => {
+        const { id, tcNo, oldStatus, newStatus } = confirmModal.payload;
+        const { error } = await supabase.from('cf_submissions').update({ payment_status: newStatus }).eq('id', id);
+        if (error) {
+            alert('Ödeme durumu güncellenirken hata oluştu.');
+            console.error(error);
+        } else {
+            setSubmissions(submissions.map(sub => sub.id === id ? { ...sub, payment_status: newStatus } : sub));
+            await logAdminAction('PAYMENT_CHANGE', tcNo, oldStatus || 'pending', newStatus);
+        }
+        setConfirmModal({ isOpen: false, type: null, payload: null });
+    };
+
+    const handleDeleteClick = (id, tcNo) => {
         setConfirmModal({
             isOpen: true,
             type: 'single_delete',
-            payload: { id, info }
+            payload: { id, info: tcNo, tcNo }
         });
     };
 
     const executeDelete = async () => {
-        const { id } = confirmModal.payload;
+        const { id, tcNo } = confirmModal.payload;
         const { error } = await supabase.from('cf_submissions').delete().eq('id', id);
         if (error) {
             alert('Silinirken hata oluştu.');
             console.error(error);
         } else {
             setSubmissions(submissions.filter(sub => sub.id !== id));
+            await logAdminAction('DELETE', tcNo, '-', 'silindi');
         }
         setConfirmModal({ isOpen: false, type: null, payload: null });
     };
@@ -309,11 +371,12 @@ export default function SubmissionsList() {
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Detaylar</th>
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Bilet & Tipi</th>
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Durum & Koltuk</th>
+                                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Ödeme</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 bg-white">
                                 {filteredSubmissions.length === 0 ? (
-                                    <tr><td colSpan="4" className="px-4 py-8 text-center text-sm text-gray-500">Aramanıza uygun kayıt bulunamadı.</td></tr>
+                                    <tr><td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">Aramanıza uygun kayıt bulunamadı.</td></tr>
                                 ) : (
                                     filteredSubmissions.map((sub) => (
                                         <tr key={sub.id} className={`hover:bg-gray-50 ${selectedRows.includes(sub.id) ? 'bg-blue-50/50' : ''}`}>
@@ -344,13 +407,17 @@ export default function SubmissionsList() {
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex flex-col items-start gap-2">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                                                        ${sub.ticket_type === 'asil' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                            sub.ticket_type === 'yedek' ? 'bg-orange-50 text-orange-700 border-orange-200' :
-                                                                'bg-gray-100 text-gray-800 border-gray-200'}`}
+                                                    <select
+                                                        value={sub.ticket_type || ''}
+                                                        onChange={(e) => handleTicketTypeChangeClick(sub.id, e.target.value, sub.tc_no)}
+                                                        className={`text-xs font-bold rounded-full border px-2.5 py-1 pr-7 outline-none cursor-pointer
+                                                            ${sub.ticket_type === 'asil' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                                sub.ticket_type === 'yedek' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                                                                    'bg-gray-100 text-gray-800 border-gray-200'}`}
                                                     >
-                                                        {sub.ticket_type === 'asil' ? '🎖️ Asil' : sub.ticket_type === 'yedek' ? '⏳ Yedek' : '-'}
-                                                    </span>
+                                                        <option value="asil">🎖️ Asil Liste</option>
+                                                        <option value="yedek">⏳ Yedek Liste</option>
+                                                    </select>
                                                     <div className="text-sm">
                                                         {sub.data?.bringGuest ? (
                                                             <div className="flex flex-col">
@@ -367,7 +434,7 @@ export default function SubmissionsList() {
                                                 <div className="flex flex-col items-start gap-3">
                                                     <select
                                                         value={sub.status}
-                                                        onChange={(e) => handleStatusChangeClick(sub.id, e.target.value)}
+                                                        onChange={(e) => handleStatusChangeClick(sub.id, e.target.value, sub.tc_no)}
                                                         className={`text-sm rounded-md border-0 py-1.5 pl-3 pr-8 ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6
                                                             ${sub.status === 'approved' ? 'bg-green-50 text-green-900 ring-green-300 focus:ring-green-600' :
                                                                 sub.status === 'rejected' ? 'bg-red-50 text-red-900 ring-red-300 focus:ring-red-600' :
@@ -392,6 +459,20 @@ export default function SubmissionsList() {
                                                 >
                                                     <Trash2 className="w-4 h-4 mr-1" /> Sil
                                                 </button>
+                                            </td>
+                                            <td className="px-4 py-4 whitespace-nowrap">
+                                                <select
+                                                    value={sub.payment_status || 'pending'}
+                                                    onChange={(e) => handlePaymentStatusChangeClick(sub.id, sub.tc_no, sub.payment_status, e.target.value)}
+                                                    className={`text-xs font-semibold rounded-md border-0 py-1.5 pl-2 pr-7 ring-1 ring-inset focus:ring-2 focus:ring-inset sm:leading-6 cursor-pointer
+                                                        ${sub.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-800 ring-emerald-300 focus:ring-emerald-600' :
+                                                            sub.payment_status === 'failed' ? 'bg-red-50 text-red-800 ring-red-300 focus:ring-red-600' :
+                                                                'bg-amber-50 text-amber-800 ring-amber-300 focus:ring-amber-600'}`}
+                                                >
+                                                    <option value="pending">⏳ Bekliyor</option>
+                                                    <option value="paid">✅ Ödendi</option>
+                                                    <option value="failed">❌ Hatalı/İptal</option>
+                                                </select>
                                             </td>
                                         </tr>
                                     ))
@@ -427,6 +508,18 @@ export default function SubmissionsList() {
                                                         confirmModal.payload.newStatus === 'cancelled' ? 'İptal Edildi' : 'Onay Bekliyor'}
                                             </strong> olarak değiştirmek istediğinize emin misiniz?</p>
                                         )}
+                                        {confirmModal.type === 'single_ticket_type' && (
+                                            <p>Seçilen adayın bilet tipini <strong>
+                                                {confirmModal.payload.newType === 'asil' ? 'Asil Liste' : 'Yedek Liste'}
+                                            </strong> olarak değiştirmek istediğinize emin misiniz? <br /><br />
+                                                <span className="text-xs text-red-500">Not: Bu işlem kapasite istatistiklerini doğrudan etkileyecektir.</span></p>
+                                        )}
+                                        {confirmModal.type === 'single_payment' && (
+                                            <p>Seçilen adayın ödeme durumunu <strong>
+                                                {confirmModal.payload.newStatus === 'paid' ? 'Tahsil Edildi' :
+                                                    confirmModal.payload.newStatus === 'failed' ? 'Başarısız/İptal' : 'Ödeme Bekliyor'}
+                                            </strong> olarak değiştirmek istediğinize emin misiniz?</p>
+                                        )}
                                         {confirmModal.type === 'bulk_status' && (
                                             <p>Seçilen <strong>{confirmModal.payload.count} adet</strong> adayın başvuru durumunu <strong>
                                                 {confirmModal.payload.newStatus === 'approved' ? 'Onaylandı' :
@@ -446,6 +539,8 @@ export default function SubmissionsList() {
                             <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                                 <button type="button" onClick={() => {
                                     if (confirmModal.type === 'single_status') executeStatusUpdate();
+                                    else if (confirmModal.type === 'single_ticket_type') executeTicketTypeUpdate();
+                                    else if (confirmModal.type === 'single_payment') executePaymentStatusUpdate();
                                     else if (confirmModal.type === 'bulk_status') executeBulkAction();
                                     else if (confirmModal.type === 'single_delete') executeDelete();
                                     else if (confirmModal.type === 'bulk_delete') (async () => {

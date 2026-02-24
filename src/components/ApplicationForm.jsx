@@ -270,11 +270,12 @@ export default function ApplicationForm({ onSubmitSuccess }) {
       const tc = watch('tcNo');
 
       // Check for existing application
+      // TC numarası eşsiz ve OTP doğrulamasından geçildi, user_id filtresi gereksiz
+      // (ilk başvuruda user_id null olabilir, bu yüzden eşleşmezdi)
       const { data: existingApp, error: fetchError } = await supabase
         .from('cf_submissions')
         .select('data, status, seating_preference, ticket_type')
         .eq('tc_no', tc)
-        .eq('user_id', session.user.id)
         .maybeSingle();
 
       if (existingApp) {
@@ -458,12 +459,12 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           <div className="mt-4 pt-4 border-t border-dpg-gold/20 flex flex-col md:flex-row justify-center items-center gap-4 text-sm font-body">
             <div className="text-dpg-silver">
               <span className="text-dpg-gold mr-1">Asil Kota (Dolu):</span>
-              {Math.min(quotaStats.total_reserved, quotaStats.asil_capacity)} / {quotaStats.asil_capacity}
+              {quotaStats.asil_reserved} / {quotaStats.asil_capacity}
             </div>
             <div className="hidden md:block w-px h-4 bg-dpg-gold/30"></div>
             <div className="text-dpg-silver">
               <span className="text-dpg-gold mr-1">Yedek Kota (Dolu):</span>
-              {Math.max(0, quotaStats.total_reserved - quotaStats.asil_capacity)} / {quotaStats.yedek_capacity}
+              {quotaStats.yedek_reserved} / {quotaStats.yedek_capacity}
             </div>
           </div>
         )}
@@ -851,7 +852,9 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                         color: errors.paymentApproval ? '#b91c1c' : theme.colors.textMuted,
                       }}
                     >
-                      {bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin TALPA'ya kayıtlı kredi kartımdan tahsil edilmesini onaylıyorum.
+                      {ticketType === 'yedek'
+                        ? `Yedek listede olduğumu anlıyorum. Asıl listeye geçmem durumunda ${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin tahsil edilmesini onaylıyorum.`
+                        : `${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin TALPA'ya kayıtlı kredi kartımdan tahsil edilmesini onaylıyorum.`}
                     </span>
                   </label>
                   {errors.paymentApproval && (
