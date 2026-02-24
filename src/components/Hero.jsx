@@ -137,7 +137,20 @@ export default function Hero({ onScrollTo }) {
               Bu özel günü TALPA öncülüğünde hep birlikte kutluyoruz!
             </p>
           </div>
-          <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] self-center items-center justify-center flex mt-2 md:mt-4">Etkinliğe Başvur</Button>
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mt-2 md:mt-4">
+            <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] items-center justify-center flex">Etkinliğe Başvur</Button>
+            <a
+              href="https://www.talpa.org/wp-content/uploads/2026/02/acil-durum-plani.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 hover:bg-white/5 border border-white/20 px-6 py-4 rounded-md transition-colors duration-300 text-dpg-text-muted hover:text-dpg-gold text-lg md:text-xl font-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-dpg-gold min-h-[60px]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Acil Durum Planı
+            </a>
+          </div>
         </div>
       </motion.div>
 
