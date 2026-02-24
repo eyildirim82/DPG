@@ -187,6 +187,14 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
       // If they already have an application process beyond "locked", retrieve email + OTP
       if (data.status !== 'locked') {
+        // Set state from existing submission data for edit/cancel flow
+        if (data.ticket_type) setTicketType(data.ticket_type);
+        if (data.cancel_token) {
+          setCancelToken(data.cancel_token);
+          localStorage.setItem('dpg_cancel_token', data.cancel_token);
+        }
+        setSubmissionStatus(data.status);
+
         const { data: emailData, error: emailError } = await supabase.rpc('get_submission_email', { p_tc_no: trimmedTc });
 
         if (emailData && emailData.exists && emailData.email) {
