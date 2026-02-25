@@ -40,7 +40,17 @@ No ESLint config or test framework is currently configured in this repo. There a
 | `/admin/email-templates` | Email template editor |
 | `/admin/quota` | Quota settings |
 
+### .env file setup for Cloud Agents
+When Cursor Secrets (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_ADMIN_PASSWORD`) are injected as environment variables, write them to `.env` before starting the dev server:
+```bash
+echo "VITE_SUPABASE_URL=${VITE_SUPABASE_URL}" > .env
+echo "VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}" >> .env
+echo "VITE_ADMIN_PASSWORD=${VITE_ADMIN_PASSWORD}" >> .env
+```
+Vite reads `VITE_*` vars from `.env` at startup — changing the file requires a dev server restart to take effect.
+
 ### Gotchas
 - Node.js 20 is required (pinned in `.nvmrc` and `package.json` engines).
 - Admin auth is client-side only — `sessionStorage` key `dpg_admin_authenticated` is set on successful login.
 - The Supabase client (`src/lib/supabase.js`) will throw if `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are undefined, but the app still renders the public page.
+- The Supabase anon key provided via secrets is a publishable key (safe for client-side use).
