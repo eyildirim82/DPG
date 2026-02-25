@@ -412,7 +412,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           body: {
             email_type: 'application_received',
             recipients: [{ email: formData.email, name: formData.name }],
-            extra_data: { ticket_type: ticketType || 'yedek' }
+            extra_data: { ticket_label: (ticketType || 'yedek') === 'asil' ? 'Asil Liste' : 'Yedek Liste' }
           }
         }).catch(err => console.error('Kullanıcı bildirim hatası:', err));
 
@@ -425,8 +425,8 @@ export default function ApplicationForm({ onSubmitSuccess }) {
               name: formData.name,
               tc_no: formData.tcNo?.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$3**'),
               airline: formData.airline || '-',
-              ticket_type: ticketType || 'yedek',
-              has_guest: formData.bringGuest
+              ticket_label: (ticketType || 'yedek') === 'asil' ? '🟢 Asil' : '🟡 Yedek',
+              guest_label: formData.bringGuest ? '✅ Evet (+1)' : '❌ Hayır'
             }
           }
         }).catch(err => console.error('Admin bildirim hatası:', err));
@@ -647,9 +647,9 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             </div>
           ) : null}
 
-          {attendedBefore && (
-            <div className="mb-6 py-4 px-5 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-base md:text-lg font-body">
-              <strong>Bilgilendirme:</strong> Geçmiş yıllardaki DPG etkinliklerimize katıldığınız tespit edilmiştir. Başvurunuz <strong>Eski Katılımcı Asil Kotası</strong> üzerinden değerlendirilecektir.
+          {ticketType === 'yedek' && !submissionStatus && (
+            <div className="mb-6 py-4 px-5 rounded border border-yellow-500/50 bg-yellow-500/10 text-yellow-200 text-base md:text-lg font-body">
+              <strong>Bilgilendirme:</strong> Asil kotası dolduğu için başvurunuz <strong>Yedek Liste</strong> üzerinden değerlendirilecektir. Asil listeden iptal olması durumunda sıranıza göre asil listeye alınacaksınız.
             </div>
           )}
 

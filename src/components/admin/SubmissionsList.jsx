@@ -41,6 +41,7 @@ export default function SubmissionsList() {
                 .from('cf_submissions')
                 .select('*, cf_forms(title, schema)')
                 .eq('form_id', formData.id)
+                .eq('is_confirmed', true)
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -110,7 +111,7 @@ export default function SubmissionsList() {
                 sendNotificationEmail(emailTypeMap[newStatus], {
                     email: oldSub.data?.email,
                     name: oldSub.data?.name || oldSub.full_name || ''
-                }, { ticket_type: oldSub.ticket_type });
+                }, { ticket_label: oldSub.ticket_type === 'asil' ? 'Asil Liste' : 'Yedek Liste' });
             }
         }
         setConfirmModal({ isOpen: false, type: null, payload: null });
@@ -140,7 +141,7 @@ export default function SubmissionsList() {
                 sendNotificationEmail('ticket_type_change', {
                     email: oldSub.data?.email,
                     name: oldSub.data?.name || oldSub.full_name || ''
-                }, { old_type: oldSub.ticket_type, new_type: newType });
+                }, { old_label: oldSub.ticket_type === 'asil' ? 'Asil Liste' : 'Yedek Liste', new_label: newType === 'asil' ? 'Asil Liste' : 'Yedek Liste' });
             }
         }
         setConfirmModal({ isOpen: false, type: null, payload: null });

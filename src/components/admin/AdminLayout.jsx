@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Settings, Users, LogOut, MessageSquare, Ticket } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings, Users, LogOut, MessageSquare, Ticket, Mail } from 'lucide-react';
 
 export default function AdminLayout() {
     const location = useLocation();
@@ -16,6 +16,7 @@ export default function AdminLayout() {
         { name: 'Beyaz Liste (TC)', path: '/admin/whitelist', icon: Users },
         { name: 'Gelen Başvurular', path: '/admin/submissions', icon: Settings },
         { name: 'İletişim Yönetimi', path: '/admin/communication', icon: MessageSquare },
+        { name: 'E-posta Şablonları', path: '/admin/email-templates', icon: Mail },
         { name: 'Kota Ayarları', path: '/admin/quota', icon: Ticket },
     ];
 
