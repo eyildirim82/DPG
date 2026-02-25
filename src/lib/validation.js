@@ -41,6 +41,15 @@ export const FLEET_OPTIONS = [
   { value: 'Diğer', label: 'Diğer' },
 ];
 
+export const AGE_GROUP_OPTIONS = [
+  { value: '18-25', label: '18-25' },
+  { value: '26-35', label: '26-35' },
+  { value: '36-44', label: '36-44' },
+  { value: '45-55', label: '45-55' },
+  { value: '56-65', label: '56-65' },
+  { value: '65+', label: '65+' },
+];
+
 export const applicationFormSchema = z
   .object({
     tcNo: tcNoSchema,
@@ -59,10 +68,7 @@ export const applicationFormSchema = z
         (val) => (val && val.replace(/\D/g, '').length >= 10) || false,
         'Geçerli bir telefon numarası giriniz (en az 10 hane).'
       ),
-    birthYear: z.string().refine((val) => {
-      const year = parseInt(val, 10);
-      return !isNaN(year) && year > 1900 && year <= new Date().getFullYear();
-    }, 'Geçerli bir doğum yılı giriniz.'),
+    ageGroup: z.string().min(1, 'Lütfen yaş aralığı seçiniz.'),
     bringGuest: z.boolean().optional().default(false),
     guestName: z.string().optional(),
     paymentApproval: z.literal(true, {

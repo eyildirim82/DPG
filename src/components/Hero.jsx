@@ -79,12 +79,11 @@ export default function Hero({ onScrollTo }) {
         variants={item}
         className="w-full max-w-[1100px] mx-auto mb-4 md:mb-6 flex flex-col gap-4 md:gap-6"
       >
-        <div className="relative rounded overflow-hidden border border-dpg-gold-dim flex items-center justify-center w-full aspect-video max-h-[320px] sm:max-h-[380px] md:max-h-[420px] bg-dpg-navy mt-4 md:mt-6"
-        >
+        <div className="relative mx-auto rounded overflow-hidden border border-dpg-gold-dim flex items-center justify-center w-full aspect-video max-w-[500px] md:max-w-[700px] max-h-[400px] sm:max-h-[450px] md:max-h-[500px] bg-dpg-navy mt-4 md:mt-6">
           {videoError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-20 bg-dpg-navy p-4">
-              <img src="/talpa-logo.webp" alt="TALPA" className="h-24 md:h-28 w-auto object-contain opacity-80" />
-              <p className="text-dpg-text-muted text-sm text-center">{videoError}</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-dpg-navy overflow-hidden">
+              <img src="/bg.jpg" alt="Fallback Background" className="absolute inset-x-0 inset-y-0 w-full h-full object-cover z-0" />
+              <p className="relative z-10 text-white text-sm text-center bg-black/60 px-4 py-2 rounded">{videoError}</p>
             </div>
           )}
           {showPlayButton && !videoError && (
@@ -94,62 +93,59 @@ export default function Hero({ onScrollTo }) {
               className="absolute inset-0 z-[2] flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-dpg-gold focus-visible:outline-offset-2"
               aria-label="Videoyu oynat"
             >
-              <span className="w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center text-dpg-gold border-2 border-dpg-gold/80 bg-dpg-navy/80 hover:bg-dpg-gold/20 transition-colors">
-                <PlayIcon className="w-10 h-10 md:w-12 md:h-12 ml-1 text-dpg-gold" />
+              <span className="w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center text-dpg-gold border-2 border-dpg-gold/80 bg-dpg-navy/80 hover:bg-dpg-gold/20 transition-colors">
+                <PlayIcon className="w-8 h-8 md:w-12 md:h-12 ml-1 text-dpg-gold" />
               </span>
             </button>
           )}
-          <video
-            ref={videoRef}
-            src={VIDEO_SRC}
-            poster="/talpa-logo.webp"
-            className="w-full h-full object-contain relative z-[1] bg-dpg-navy"
-            controls
-            controlsList="nodownload"
-            playsInline
-            preload="metadata"
-            onPlay={() => setShowPlayButton(false)}
-            onPause={() => setShowPlayButton(true)}
-            onError={(e) => {
-              const v = e.target;
-              const msg = v.error?.message || v.error?.code;
-              setVideoError(msg ? `Video yüklenemedi: ${msg}` : 'Video oynatılamadı.');
-            }}
+          <div
+            className="absolute inset-x-0 inset-y-0 w-full h-full z-[1]"
+            onMouseEnter={() => videoRef.current && (videoRef.current.controls = true)}
+            onMouseLeave={() => videoRef.current && (videoRef.current.controls = false)}
           >
-            Tarayıcınız video oynatmayı desteklemiyor.
-          </video>
+            <video
+              ref={videoRef}
+              src={VIDEO_SRC}
+              poster="/bg.jpg"
+              className="w-full h-full object-cover object-center bg-dpg-navy"
+              controls={false}
+              controlsList="nodownload"
+              playsInline
+              preload="metadata"
+              onPlay={() => setShowPlayButton(false)}
+              onPause={() => setShowPlayButton(true)}
+              onError={(e) => {
+                const v = e.target;
+                const msg = v.error?.message || v.error?.code;
+                setVideoError(msg ? `Video yüklenemedi: ${msg}` : 'Video oynatılamadı.');
+              }}
+            >
+              Tarayıcınız video oynatmayı desteklemiyor.
+            </video>
+          </div>
         </div>
 
         <div className="flex flex-col gap-6 max-w-[700px] mx-auto w-full mt-4 md:mt-8">
-          <div className="text-xl md:text-2xl leading-relaxed border-l border-dpg-gold pl-4 md:pl-6 text-left text-dpg-text-muted font-light flex flex-col gap-4">
+          <div className="text-lg md:text-xl leading-relaxed border-l border-dpg-gold pl-4 md:pl-6 text-left text-dpg-text-muted font-light flex flex-col gap-4">
             <p>
               Gökyüzünün kahramanları bir araya geliyor!
             </p>
             <p>
               Gökyüzüne adanmış bir ömrün, fedakârlığın, disiplinin ve tutkunun ortak adı;
               <br />
-              <strong className="text-dpg-gold text-2xl md:text-3xl font-medium mt-1 inline-block">Dünya Pilotlar Günü.</strong>
+              <strong className="text-dpg-gold font-medium mt-1 inline-block">Dünya Pilotlar Günü.</strong>
             </p>
-            <p className="text-base md:text-lg">
+            <p>
               Türkiye’nin ilk pilotu Fesa Evrensev’in 26 Nisan’da gerçekleştirdiği kabul edilen ilk uçuş, bugün tüm dünyada Dünya Pilotlar Günü olarak kutlanmaktadır. Bu tarih; cesaretin, vizyonun ve öncülüğün sembolüdür.
             </p>
-            <p className="font-medium mt-1 md:mt-2 text-lg md:text-xl">
+            <p className="font-medium mt-1 md:mt-2">
               Bu özel günü TALPA öncülüğünde hep birlikte kutluyoruz!
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mt-2 md:mt-4">
-            <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] items-center justify-center flex">Etkinliğe Başvur</Button>
-            <a
-              href="https://www.talpa.org/wp-content/uploads/2026/02/acil-durum-plani.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 hover:bg-white/5 border border-white/20 px-6 py-4 rounded-md transition-colors duration-300 text-dpg-text-muted hover:text-dpg-gold text-lg md:text-xl font-body focus-visible:outline focus-visible:outline-2 focus-visible:outline-dpg-gold min-h-[60px]"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Acil Durum Planı
-            </a>
+          <div className="flex justify-center mt-2 md:mt-4 w-full">
+            <Button onClick={() => onScrollTo('basvur')} className="w-full sm:w-auto min-h-[44px] items-center justify-center flex">
+              Etkinliğe Başvur
+            </Button>
           </div>
         </div>
       </motion.div>

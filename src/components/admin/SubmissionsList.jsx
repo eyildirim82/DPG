@@ -308,7 +308,7 @@ export default function SubmissionsList() {
                 'Telefon': sub.data?.phone || '',
                 'Havayolu': sub.data?.airline || '',
                 'Filo': sub.data?.fleet === 'Diğer' ? (sub.data?.fleetOther || 'Diğer') : (sub.data?.fleet || ''),
-                'Doğum Yılı': sub.data?.birthYear || '',
+                'Yaş Grubu': sub.data?.ageGroup || '',
                 'Misafir': sub.data?.bringGuest ? 'Evet (+1)' : 'Hayır',
                 'Misafir Adı': sub.data?.guestName || '',
                 'Ödeme Onayı': sub.data?.paymentApproval ? 'Onaylandı' : 'Bekliyor',
@@ -452,7 +452,7 @@ export default function SubmissionsList() {
                                                 <div className="flex flex-col gap-1 text-sm text-gray-700">
                                                     <div><span className="text-xs font-semibold text-gray-500">Havayolu:</span> {sub.data?.airline || '-'}</div>
                                                     <div><span className="text-xs font-semibold text-gray-500">Filo:</span> {sub.data?.fleet === 'Diğer' ? (sub.data?.fleetOther || 'Diğer') : (sub.data?.fleet || '-')}</div>
-                                                    <div><span className="text-xs font-semibold text-gray-500">Doğum:</span> {sub.data?.birthYear || '-'}</div>
+                                                    <div><span className="text-xs font-semibold text-gray-500">Yaş Grubu:</span> {sub.data?.ageGroup || '-'}</div>
                                                     <div className="text-xs text-gray-400 mt-1" title="Başvuru Zamanı">
                                                         {new Date(sub.created_at).toLocaleString('tr-TR')}
                                                     </div>

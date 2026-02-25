@@ -3,8 +3,9 @@ import { theme } from '../styles/theme';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import Hero from '../components/Hero';
-
 import Sponsor from '../components/Sponsor';
+import ArtistsList from '../components/ArtistsList';
+import SponsorsList from '../components/SponsorsList';
 import ApplicationForm from '../components/ApplicationForm';
 import DocumentLinks from '../components/DocumentLinks';
 import Modal from '../components/Modal';
@@ -38,6 +39,8 @@ export default function PublicPage() {
                 <Header />
                 <Hero onScrollTo={scrollTo} />
                 <Sponsor />
+                <ArtistsList />
+                <SponsorsList />
                 <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
                 <DocumentLinks />
                 <Footer />

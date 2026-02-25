@@ -3,9 +3,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import FormInput from './ui/FormInput';
+import FormSelect from './ui/FormSelect';
 import Button from './ui/Button';
 import { theme } from '../styles/theme';
-import { applicationFormSchema, isValidTCKimlikNo, FLEET_OPTIONS } from '../lib/validation';
+import { applicationFormSchema, isValidTCKimlikNo, FLEET_OPTIONS, AGE_GROUP_OPTIONS } from '../lib/validation';
 import { supabase } from '../lib/supabase';
 
 const defaultValues = {
@@ -14,7 +15,7 @@ const defaultValues = {
   airline: '',
   fleet: '',
   fleetOther: '',
-  birthYear: '',
+  ageGroup: '',
   email: '',
   phone: '',
   bringGuest: false,
@@ -463,7 +464,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   return (
     <motion.section
       id="basvur"
-      className="py-10 md:py-16 max-w-[700px] mx-auto px-4 md:px-0"
+      className="py-6 md:py-10 max-w-[700px] mx-auto px-4 md:px-0"
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.1 }}
@@ -696,34 +697,21 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
           {/* Filo Bilgisi */}
           <div data-field-error={!!errors.fleet}>
-            <label className="block text-sm md:text-base font-heading font-semibold uppercase tracking-wider mb-3" style={{ color: errors.fleet ? '#b91c1c' : 'rgba(230,194,117,0.85)' }}>
-              Filo Bilgisi
-            </label>
             <Controller
               name="fleet"
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-2">
-                    {FLEET_OPTIONS.map(opt => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => {
-                          field.onChange(opt.value);
-                          if (opt.value !== 'Diğer') setValue('fleetOther', '');
-                        }}
-                        className={`py-3 px-4 rounded-lg border-2 text-base md:text-lg font-body font-medium transition-all duration-200 ${field.value === opt.value
-                            ? 'border-dpg-gold bg-dpg-gold/20 text-dpg-gold shadow-[0_0_12px_rgba(230,194,117,0.25)]'
-                            : 'border-white/15 bg-white/5 text-gray-300 hover:bg-white/10 hover:border-white/30'
-                          }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                  {error && <p className="text-xs text-red-500 font-body mt-1">{error.message}</p>}
-                </>
+                <FormSelect
+                  label="Filo Bilgisi"
+                  options={FLEET_OPTIONS}
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    if (e.target.value !== 'Diğer') setValue('fleetOther', '');
+                  }}
+                  onBlur={field.onBlur}
+                  error={error?.message}
+                />
               )}
             />
             {fleetValue === 'Diğer' && (
@@ -747,21 +735,17 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             )}
           </div>
 
-          <div data-field-error={!!errors.birthYear}>
+          <div data-field-error={!!errors.ageGroup}>
             <Controller
-              name="birthYear"
+              name="ageGroup"
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <FormInput
-                  type="text"
-                  inputMode="numeric"
-                  maxLength="4"
-                  placeholder=" "
+                <FormSelect
+                  label="Yaş Grubu"
+                  options={AGE_GROUP_OPTIONS}
                   value={field.value}
-                  onChange={(e) => field.onChange(e.target.value.replace(/\D/g, ''))}
+                  onChange={field.onChange}
                   onBlur={field.onBlur}
-                  focused={undefined}
-                  label="Doğum Yılı"
                   error={error?.message}
                 />
               )}

@@ -31,15 +31,15 @@ const DOCUMENTS = [
 export default function DocumentLinks() {
     return (
         <motion.section
-            className="py-10 md:py-16 max-w-[700px] mx-auto px-4 md:px-0"
+            className="py-6 md:py-10 max-w-[700px] mx-auto px-4 md:px-0"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.5 }}
         >
             <div className="text-center mb-6 md:mb-8">
-                <h2 className="font-heading font-normal tracking-wide uppercase text-2xl md:text-3xl text-dpg-silver relative inline-block">
-                    Dökümanlar
+                <h2 className="font-heading font-normal tracking-wide uppercase text-3xl md:text-4xl text-dpg-silver text-center mb-6 md:mb-8 relative inline-block">
+                    Diğer Bilgiler
                     <span className="block w-[60px] h-px bg-dpg-gold mt-2.5 mx-auto" />
                 </h2>
             </div>
