@@ -6,13 +6,14 @@ import FormInput from './ui/FormInput';
 import FormSelect from './ui/FormSelect';
 import Button from './ui/Button';
 import { theme } from '../styles/theme';
-import { applicationFormSchema, isValidTCKimlikNo, FLEET_OPTIONS, AGE_GROUP_OPTIONS } from '../lib/validation';
+import { applicationFormSchema, isValidTCKimlikNo, FLEET_OPTIONS, AGE_GROUP_OPTIONS, AIRLINE_OPTIONS } from '../lib/validation';
 import { supabase } from '../lib/supabase';
 
 const defaultValues = {
   tcNo: '',
   name: '',
   airline: '',
+  airlineOther: '',
   fleet: '',
   fleetOther: '',
   ageGroup: '',
@@ -121,6 +122,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
 
   const bringGuest = watch('bringGuest');
   const fleetValue = watch('fleet');
+  const airlineValue = watch('airline');
   const paymentApproval = watch('paymentApproval');
 
   const handleTcSubmit = async (e) => {
@@ -428,7 +430,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             extra_data: {
               name: formData.name,
               tc_no: formData.tcNo?.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1***$3**'),
-              airline: formData.airline || '-',
+              airline: (formData.airline === 'Diğer' ? formData.airlineOther : formData.airline) || '-',
               ticket_label: (ticketType || 'yedek') === 'asil' ? '🟢 Asil' : '🟡 Yedek',
               guest_label: formData.bringGuest ? '✅ Evet (+1)' : '❌ Hayır'
             }
@@ -681,18 +683,38 @@ export default function ApplicationForm({ onSubmitSuccess }) {
               name="airline"
               control={control}
               render={({ field, fieldState: { error } }) => (
-                <FormInput
-                  type="text"
-                  placeholder=" "
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  focused={undefined}
+                <FormSelect
                   label="Havayolu Şirketi"
+                  options={AIRLINE_OPTIONS}
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    if (e.target.value !== 'Diğer') setValue('airlineOther', '');
+                  }}
+                  onBlur={field.onBlur}
                   error={error?.message}
                 />
               )}
             />
+            {airlineValue === 'Diğer' && (
+              <div className="mt-3" data-field-error={!!errors.airlineOther}>
+                <Controller
+                  name="airlineOther"
+                  control={control}
+                  render={({ field: otherField, fieldState: { error } }) => (
+                    <FormInput
+                      type="text"
+                      placeholder=" "
+                      value={otherField.value}
+                      onChange={otherField.onChange}
+                      onBlur={otherField.onBlur}
+                      label="Havayolu Şirketi (Diğer)"
+                      error={error?.message}
+                    />
+                  )}
+                />
+              </div>
+            )}
           </div>
 
           {/* Filo Bilgisi */}

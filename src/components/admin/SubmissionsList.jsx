@@ -306,7 +306,7 @@ export default function SubmissionsList() {
                 'Ad Soyad': sub.data?.name || '',
                 'E-Posta': sub.data?.email || '',
                 'Telefon': sub.data?.phone || '',
-                'Havayolu': sub.data?.airline || '',
+                'Havayolu': sub.data?.airline === 'Diğer' ? (sub.data?.airlineOther || 'Diğer') : (sub.data?.airline || ''),
                 'Filo': sub.data?.fleet === 'Diğer' ? (sub.data?.fleetOther || 'Diğer') : (sub.data?.fleet || ''),
                 'Yaş Grubu': sub.data?.ageGroup || '',
                 'Misafir': sub.data?.bringGuest ? 'Evet (+1)' : 'Hayır',
@@ -450,7 +450,7 @@ export default function SubmissionsList() {
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex flex-col gap-1 text-sm text-gray-700">
-                                                    <div><span className="text-xs font-semibold text-gray-500">Havayolu:</span> {sub.data?.airline || '-'}</div>
+                                                    <div><span className="text-xs font-semibold text-gray-500">Havayolu:</span> {sub.data?.airline === 'Diğer' ? (sub.data?.airlineOther || 'Diğer') : (sub.data?.airline || '-')}</div>
                                                     <div><span className="text-xs font-semibold text-gray-500">Filo:</span> {sub.data?.fleet === 'Diğer' ? (sub.data?.fleetOther || 'Diğer') : (sub.data?.fleet || '-')}</div>
                                                     <div><span className="text-xs font-semibold text-gray-500">Yaş Grubu:</span> {sub.data?.ageGroup || '-'}</div>
                                                     <div className="text-xs text-gray-400 mt-1" title="Başvuru Zamanı">

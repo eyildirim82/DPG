@@ -41,6 +41,21 @@ export const FLEET_OPTIONS = [
   { value: 'Diğer', label: 'Diğer' },
 ];
 
+export const AIRLINE_OPTIONS = [
+  { value: 'THY', label: 'THY' },
+  { value: 'PGS', label: 'PGS' },
+  { value: 'AJET', label: 'AJET' },
+  { value: 'SUNEXP', label: 'SUNEXP' },
+  { value: 'MNG', label: 'MNG' },
+  { value: 'SET AIR', label: 'SET AIR' },
+  { value: 'BBN', label: 'BBN' },
+  { value: 'SOUTHWIND', label: 'SOUTHWIND' },
+  { value: 'CORENDON', label: 'CORENDON' },
+  { value: 'AIR ACT', label: 'AIR ACT' },
+  { value: 'AIR ANKA', label: 'AIR ANKA' },
+  { value: 'Diğer', label: 'Diğer (Lütfen belirtiniz.)' },
+];
+
 export const AGE_GROUP_OPTIONS = [
   { value: '18-25', label: '18-25' },
   { value: '26-35', label: '26-35' },
@@ -57,7 +72,8 @@ export const applicationFormSchema = z
       .string()
       .min(1, 'Ad Soyad zorunludur.')
       .refine(fullNameMinWords, 'Lütfen en az ad ve soyad giriniz.'),
-    airline: z.string().min(1, 'Havayolu şirketi zorunludur.'),
+    airline: z.string().min(1, 'Lütfen havayolu şirketi seçiniz.'),
+    airlineOther: z.string().optional(),
     fleet: z.string().min(1, 'Filo bilgisi zorunludur.'),
     fleetOther: z.string().optional(),
     email: z.string().min(1, 'E-posta zorunludur.').email('Geçerli bir e-posta adresi giriniz.'),
@@ -97,6 +113,18 @@ export const applicationFormSchema = z
     {
       message: 'Lütfen filo bilginizi giriniz.',
       path: ['fleetOther'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.airline === 'Diğer') {
+        return data.airlineOther && data.airlineOther.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Lütfen havayolu bilgisini belirtiniz.',
+      path: ['airlineOther'],
     }
   );
 
