@@ -33,6 +33,14 @@ const fullNameMinWords = (val) => {
   return words.length >= 2;
 };
 
+export const FLEET_OPTIONS = [
+  { value: 'B737', label: 'B737' },
+  { value: 'B777/787', label: 'B777/787' },
+  { value: 'A320', label: 'A320' },
+  { value: 'A330/350', label: 'A330/350' },
+  { value: 'Diğer', label: 'Diğer' },
+];
+
 export const applicationFormSchema = z
   .object({
     tcNo: tcNoSchema,
@@ -41,6 +49,8 @@ export const applicationFormSchema = z
       .min(1, 'Ad Soyad zorunludur.')
       .refine(fullNameMinWords, 'Lütfen en az ad ve soyad giriniz.'),
     airline: z.string().min(1, 'Havayolu şirketi zorunludur.'),
+    fleet: z.string().min(1, 'Filo bilgisi zorunludur.'),
+    fleetOther: z.string().optional(),
     email: z.string().min(1, 'E-posta zorunludur.').email('Geçerli bir e-posta adresi giriniz.'),
     phone: z
       .string()
@@ -69,6 +79,18 @@ export const applicationFormSchema = z
     {
       message: 'Lütfen misafirinizin adını ve soyadını giriniz.',
       path: ['guestName'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.fleet === 'Diğer') {
+        return data.fleetOther && data.fleetOther.trim().length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Lütfen filo bilginizi giriniz.',
+      path: ['fleetOther'],
     }
   );
 

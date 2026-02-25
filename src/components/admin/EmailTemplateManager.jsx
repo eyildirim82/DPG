@@ -142,6 +142,8 @@ export default function EmailTemplateManager() {
             new_label: 'Asil Liste',
             tc_no: '12345678901',
             airline: 'THY',
+            fleet: 'B737',
+            sequence_number: '42',
             guest_label: '✅ Evet (+1)',
             sender_name: 'Test Gönderici',
             sender_email: 'test@example.com',
@@ -339,6 +341,71 @@ export default function EmailTemplateManager() {
                                         <option value="admin">Admin'e Giden</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            {/* Available Variables Reference */}
+                            <div>
+                                <details className="group">
+                                    <summary className="flex items-center gap-2 text-sm font-semibold text-gray-700 cursor-pointer select-none mb-2 hover:text-blue-600 transition-colors">
+                                        <svg className="w-4 h-4 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                        📋 Kullanılabilir Değişkenler
+                                        <span className="text-xs text-gray-400 font-normal">(tıklayarak kopyala)</span>
+                                    </summary>
+                                    <div className="mt-2 p-4 bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-lg border border-gray-200 space-y-3">
+                                        {[
+                                            {
+                                                label: 'Genel', vars: [
+                                                    { k: 'name', d: 'Ad Soyad' },
+                                                    { k: 'tc_no', d: 'TC Kimlik No' },
+                                                ]
+                                            },
+                                            {
+                                                label: 'Başvuru', vars: [
+                                                    { k: 'airline', d: 'Havayolu' },
+                                                    { k: 'fleet', d: 'Filo bilgisi' },
+                                                    { k: 'ticket_label', d: 'Bilet tipi' },
+                                                    { k: 'guest_label', d: 'Misafir' },
+                                                    { k: 'sequence_number', d: 'Sıra No' },
+                                                ]
+                                            },
+                                            {
+                                                label: 'Bilet Değişikliği', vars: [
+                                                    { k: 'old_label', d: 'Eski tip' },
+                                                    { k: 'new_label', d: 'Yeni tip' },
+                                                ]
+                                            },
+                                            {
+                                                label: 'İletişim Formu', vars: [
+                                                    { k: 'sender_name', d: 'Gönderen' },
+                                                    { k: 'sender_email', d: 'E-posta' },
+                                                    { k: 'subject', d: 'Konu' },
+                                                    { k: 'message', d: 'Mesaj' },
+                                                ]
+                                            },
+                                        ].map(group => (
+                                            <div key={group.label}>
+                                                <p className="text-[11px] uppercase tracking-wider text-gray-400 font-bold mb-1.5">{group.label}</p>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {group.vars.map(v => (
+                                                        <button
+                                                            key={v.k}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(`{{${v.k}}}`);
+                                                                showToast(`{{${v.k}}} kopyalandı!`);
+                                                            }}
+                                                            className="inline-flex items-center gap-1 px-2 py-1 bg-white text-xs font-mono rounded border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-all cursor-pointer shadow-sm"
+                                                            title={v.d}
+                                                        >
+                                                            <Copy className="w-3 h-3 opacity-40" />
+                                                            {`{{${v.k}}}`}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </details>
                             </div>
 
                             {/* Variables */}

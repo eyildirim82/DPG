@@ -5,13 +5,15 @@ import { motion } from 'framer-motion';
 import FormInput from './ui/FormInput';
 import Button from './ui/Button';
 import { theme } from '../styles/theme';
-import { applicationFormSchema, isValidTCKimlikNo } from '../lib/validation';
+import { applicationFormSchema, isValidTCKimlikNo, FLEET_OPTIONS } from '../lib/validation';
 import { supabase } from '../lib/supabase';
 
 const defaultValues = {
   tcNo: '',
   name: '',
   airline: '',
+  fleet: '',
+  fleetOther: '',
   birthYear: '',
   email: '',
   phone: '',
@@ -117,6 +119,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   });
 
   const bringGuest = watch('bringGuest');
+  const fleetValue = watch('fleet');
   const paymentApproval = watch('paymentApproval');
 
   const handleTcSubmit = async (e) => {
@@ -689,6 +692,59 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                 />
               )}
             />
+          </div>
+
+          {/* Filo Bilgisi */}
+          <div data-field-error={!!errors.fleet}>
+            <label className="block text-sm md:text-base font-heading font-semibold uppercase tracking-wider mb-3" style={{ color: errors.fleet ? '#b91c1c' : 'rgba(230,194,117,0.85)' }}>
+              Filo Bilgisi
+            </label>
+            <Controller
+              name="fleet"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-2">
+                    {FLEET_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          field.onChange(opt.value);
+                          if (opt.value !== 'Diğer') setValue('fleetOther', '');
+                        }}
+                        className={`py-3 px-4 rounded-lg border-2 text-base md:text-lg font-body font-medium transition-all duration-200 ${field.value === opt.value
+                            ? 'border-dpg-gold bg-dpg-gold/20 text-dpg-gold shadow-[0_0_12px_rgba(230,194,117,0.25)]'
+                            : 'border-white/15 bg-white/5 text-gray-300 hover:bg-white/10 hover:border-white/30'
+                          }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                  {error && <p className="text-xs text-red-500 font-body mt-1">{error.message}</p>}
+                </>
+              )}
+            />
+            {fleetValue === 'Diğer' && (
+              <div className="mt-3" data-field-error={!!errors.fleetOther}>
+                <Controller
+                  name="fleetOther"
+                  control={control}
+                  render={({ field: otherField, fieldState: { error } }) => (
+                    <FormInput
+                      type="text"
+                      placeholder=" "
+                      value={otherField.value}
+                      onChange={otherField.onChange}
+                      onBlur={otherField.onBlur}
+                      label="Filo Bilgisi (Diğer)"
+                      error={error?.message}
+                    />
+                  )}
+                />
+              </div>
+            )}
           </div>
 
           <div data-field-error={!!errors.birthYear}>

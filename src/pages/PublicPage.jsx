@@ -6,6 +6,7 @@ import Hero from '../components/Hero';
 
 import Sponsor from '../components/Sponsor';
 import ApplicationForm from '../components/ApplicationForm';
+import DocumentLinks from '../components/DocumentLinks';
 import Modal from '../components/Modal';
 
 export default function PublicPage() {
@@ -38,6 +39,7 @@ export default function PublicPage() {
                 <Hero onScrollTo={scrollTo} />
                 <Sponsor />
                 <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
+                <DocumentLinks />
                 <Footer />
             </div>
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} isUpdate={isUpdate} />

@@ -300,18 +300,20 @@ export default function SubmissionsList() {
             }
 
             return {
-                'Ba\u015fvuru Tarihi': new Date(sub.created_at).toLocaleString('tr-TR'),
+                'Sıra No': sub.sequence_number || '',
+                'Başvuru Tarihi': new Date(sub.created_at).toLocaleString('tr-TR'),
                 'TC Kimlik': sub.tc_no || '',
                 'Ad Soyad': sub.data?.name || '',
                 'E-Posta': sub.data?.email || '',
                 'Telefon': sub.data?.phone || '',
                 'Havayolu': sub.data?.airline || '',
-                'Do\u011fum Y\u0131l\u0131': sub.data?.birthYear || '',
-                'Misafir': sub.data?.bringGuest ? 'Evet (+1)' : 'Hay\u0131r',
-                'Misafir Ad\u0131': sub.data?.guestName || '',
-                '\u00D6deme Onay\u0131': sub.data?.paymentApproval ? 'Onayland\u0131' : 'Bekliyor',
+                'Filo': sub.data?.fleet === 'Diğer' ? (sub.data?.fleetOther || 'Diğer') : (sub.data?.fleet || ''),
+                'Doğum Yılı': sub.data?.birthYear || '',
+                'Misafir': sub.data?.bringGuest ? 'Evet (+1)' : 'Hayır',
+                'Misafir Adı': sub.data?.guestName || '',
+                'Ödeme Onayı': sub.data?.paymentApproval ? 'Onaylandı' : 'Bekliyor',
                 'Bilet Tipi': sub.ticket_type === 'asil' ? 'Asil' : sub.ticket_type === 'yedek' ? 'Yedek' : 'Bilinmiyor',
-                'Durum': sub.status === 'approved' ? 'Onayland\u0131' : sub.status === 'rejected' ? 'Reddedildi' : sub.status === 'cancelled' ? '\u0130ptal Edildi' : 'Onay Bekliyor',
+                'Durum': sub.status === 'approved' ? 'Onaylandı' : sub.status === 'rejected' ? 'Reddedildi' : sub.status === 'cancelled' ? 'İptal Edildi' : 'Onay Bekliyor',
                 'Koltuk Tercihleri': seatingStr
             };
         });
@@ -411,6 +413,7 @@ export default function SubmissionsList() {
                                             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
                                         />
                                     </th>
+                                    <th scope="col" className="px-3 py-3 text-center text-xs font-semibold text-gray-900 uppercase tracking-wider w-16">Sıra</th>
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Kişi Bilgisi</th>
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Detaylar</th>
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Bilet & Tipi</th>
@@ -420,7 +423,7 @@ export default function SubmissionsList() {
                             </thead>
                             <tbody className="divide-y divide-gray-200 bg-white">
                                 {filteredSubmissions.length === 0 ? (
-                                    <tr><td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500">Aramanıza uygun kayıt bulunamadı.</td></tr>
+                                    <tr><td colSpan="7" className="px-4 py-8 text-center text-sm text-gray-500">Aramanıza uygun kayıt bulunamadı.</td></tr>
                                 ) : (
                                     filteredSubmissions.map((sub) => (
                                         <tr key={sub.id} className={`hover:bg-gray-50 ${selectedRows.includes(sub.id) ? 'bg-blue-50/50' : ''}`}>
@@ -431,6 +434,11 @@ export default function SubmissionsList() {
                                                     checked={selectedRows.includes(sub.id)}
                                                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
                                                 />
+                                            </td>
+                                            <td className="px-3 py-4 whitespace-nowrap text-center">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-xs font-bold text-gray-700 border border-gray-200">
+                                                    {sub.sequence_number || '-'}
+                                                </span>
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex flex-col">
@@ -443,6 +451,7 @@ export default function SubmissionsList() {
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex flex-col gap-1 text-sm text-gray-700">
                                                     <div><span className="text-xs font-semibold text-gray-500">Havayolu:</span> {sub.data?.airline || '-'}</div>
+                                                    <div><span className="text-xs font-semibold text-gray-500">Filo:</span> {sub.data?.fleet === 'Diğer' ? (sub.data?.fleetOther || 'Diğer') : (sub.data?.fleet || '-')}</div>
                                                     <div><span className="text-xs font-semibold text-gray-500">Doğum:</span> {sub.data?.birthYear || '-'}</div>
                                                     <div className="text-xs text-gray-400 mt-1" title="Başvuru Zamanı">
                                                         {new Date(sub.created_at).toLocaleString('tr-TR')}
