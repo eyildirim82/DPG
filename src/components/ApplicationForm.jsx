@@ -21,6 +21,7 @@ const defaultValues = {
   phone: '',
   bringGuest: false,
   guestName: '',
+  kvkkApproval: false,
   paymentApproval: false,
 };
 
@@ -883,67 +884,139 @@ export default function ApplicationForm({ onSubmitSuccess }) {
             )}
           </div>
 
-          {/* Ödeme Onay */}
-          <div
-            className="flex items-start gap-4 mb-12 p-4 rounded border"
-            style={{
-              borderColor: paymentApproval ? 'rgba(230, 194, 117, 0.5)' : 'rgba(230, 194, 117, 0.3)',
-              backgroundColor: 'rgba(230, 194, 117, 0.04)',
-            }}
-            data-field-error={!!errors.paymentApproval}
-          >
-            <Controller
-              name="paymentApproval"
-              control={control}
-              render={({ field }) => (
-                <>
-                  <label className="flex items-start cursor-pointer flex-1">
-                    <input
-                      type="checkbox"
-                      checked={field.value}
-                      onChange={(e) => field.onChange(e.target.checked)}
-                      onBlur={field.onBlur}
-                      className="sr-only"
-                    />
-                    <span
-                      role="checkbox"
-                      tabIndex={0}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        field.onChange(!field.value);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+          {/* Formal Footer: KVKK and Payment Approval */}
+          <div className="flex flex-col gap-6 mb-12">
+            {/* KVKK Onay */}
+            <div
+              className="flex items-start gap-4 p-4 rounded border transition-colors duration-300"
+              style={{
+                borderColor: watch('kvkkApproval') ? 'rgba(230, 194, 117, 0.5)' : 'rgba(230, 194, 117, 0.3)',
+                backgroundColor: 'rgba(230, 194, 117, 0.04)',
+              }}
+              data-field-error={!!errors.kvkkApproval}
+            >
+              <Controller
+                name="kvkkApproval"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex flex-col w-full">
+                    <label className="flex items-start cursor-pointer flex-1">
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        onBlur={field.onBlur}
+                        className="sr-only"
+                      />
+                      <span
+                        role="checkbox"
+                        tabIndex={0}
+                        onClick={(e) => {
                           e.preventDefault();
                           field.onChange(!field.value);
-                        }
-                      }}
-                      className="w-7 h-7 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
-                      aria-checked={field.value}
-                    >
-                      {field.value && (
-                        <span className="w-4 h-4 bg-dpg-gold block" />
-                      )}
-                    </span>
-                    <span
-                      className="ml-4 text-base md:text-lg font-body font-medium"
-                      style={{
-                        color: errors.paymentApproval ? '#b91c1c' : theme.colors.textMuted,
-                      }}
-                    >
-                      {ticketType === 'yedek'
-                        ? `Yedek listede olduğumu anlıyorum. Asıl listeye geçmem durumunda ${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin tahsil edilmesini onaylıyorum.`
-                        : `${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin TALPA'ya kayıtlı kredi kartımdan tahsil edilmesini onaylıyorum.`}
-                    </span>
-                  </label>
-                  {errors.paymentApproval && (
-                    <p className="text-xs text-red-500 font-body mt-1 ml-9">
-                      {errors.paymentApproval.message}
-                    </p>
-                  )}
-                </>
-              )}
-            />
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            field.onChange(!field.value);
+                          }
+                        }}
+                        className="w-7 h-7 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
+                        aria-checked={field.value}
+                      >
+                        {field.value && (
+                          <span className="w-4 h-4 bg-dpg-gold block" />
+                        )}
+                      </span>
+                      <span
+                        className="ml-4 text-base md:text-lg font-body font-medium"
+                        style={{
+                          color: errors.kvkkApproval ? '#b91c1c' : theme.colors.textMuted,
+                        }}
+                      >
+                        <a
+                          href="https://www.talpa.org/wp-content/uploads/2019/12/opark-aydinlatma-metni-kodlu.pdf"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-dpg-gold underline hover:no-underline font-semibold"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          KVKK Aydınlatma Metni
+                        </a>'ni okudum, onaylıyorum.
+                      </span>
+                    </label>
+                    {errors.kvkkApproval && (
+                      <p className="text-xs text-red-500 font-body mt-2 ml-11">
+                        {errors.kvkkApproval.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+            </div>
+
+            {/* Ödeme Onay */}
+            <div
+              className="flex items-start gap-4 p-4 rounded border transition-colors duration-300"
+              style={{
+                borderColor: paymentApproval ? 'rgba(230, 194, 117, 0.5)' : 'rgba(230, 194, 117, 0.3)',
+                backgroundColor: 'rgba(230, 194, 117, 0.04)',
+              }}
+              data-field-error={!!errors.paymentApproval}
+            >
+              <Controller
+                name="paymentApproval"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex flex-col w-full">
+                    <label className="flex items-start cursor-pointer flex-1">
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        onBlur={field.onBlur}
+                        className="sr-only"
+                      />
+                      <span
+                        role="checkbox"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          field.onChange(!field.value);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            field.onChange(!field.value);
+                          }
+                        }}
+                        className="w-7 h-7 border border-dpg-gold flex items-center justify-center cursor-pointer flex-shrink-0 mt-0.5"
+                        aria-checked={field.value}
+                      >
+                        {field.value && (
+                          <span className="w-4 h-4 bg-dpg-gold block" />
+                        )}
+                      </span>
+                      <span
+                        className="ml-4 text-base md:text-lg font-body font-medium"
+                        style={{
+                          color: errors.paymentApproval ? '#b91c1c' : theme.colors.textMuted,
+                        }}
+                      >
+                        {ticketType === 'yedek'
+                          ? `Yedek listede olduğumu anlıyorum. Asıl listeye geçmem durumunda ${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin tahsil edilmesini onaylıyorum.`
+                          : `${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin TALPA'ya kayıtlı kredi kartımdan tahsil edilmesini onaylıyorum.`}
+                      </span>
+                    </label>
+                    {errors.paymentApproval && (
+                      <p className="text-xs text-red-500 font-body mt-2 ml-11">
+                        {errors.paymentApproval.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+            </div>
           </div>
 
           <Button type="submit" className="w-full" style={{ opacity: submitting || deleting ? 0.7 : 1 }} disabled={submitting || deleting}>

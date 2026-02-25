@@ -87,6 +87,9 @@ export const applicationFormSchema = z
     ageGroup: z.string().min(1, 'Lütfen yaş aralığı seçiniz.'),
     bringGuest: z.boolean().optional().default(false),
     guestName: z.string().optional(),
+    kvkkApproval: z.literal(true, {
+      errorMap: () => ({ message: 'KVKK Aydınlatma Metni\'ni onaylamanız gerekmektedir.' }),
+    }),
     paymentApproval: z.literal(true, {
       errorMap: () => ({ message: 'Ödeme tahsilatını onaylamanız gerekmektedir.' }),
     }),
