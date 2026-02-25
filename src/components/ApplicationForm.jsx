@@ -925,7 +925,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           </div>
 
           <Button type="submit" className="w-full" style={{ opacity: submitting || deleting ? 0.7 : 1 }} disabled={submitting || deleting}>
-            {submitting ? 'İşleniyor...' : submissionStatus ? 'Bilgilerimi Güncelle' : ticketType === 'asil' ? 'Katılımımı Onayla (ASİL)' : ticketType === 'yedek' ? 'Katılımımı Onayla (YEDEK)' : 'Katılımımı Onayla'}
+            {submitting ? 'İşleniyor...' : submissionStatus ? 'Bilgilerimi Güncelle' : 'Katılımımı Onayla'}
           </Button>
 
           {submissionStatus && submissionStatus !== 'cancelled' && (

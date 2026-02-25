@@ -160,7 +160,7 @@ export default function SubmissionsList() {
         const sub = submissions.find(s => s.id === id);
         const { error } = await supabase.from('cf_submissions').update({ payment_status: newStatus }).eq('id', id);
         if (error) {
-            alert('Ödeme durumu güncellenirken hata oluştu.');
+            alert('Tahsilat durumu güncellenirken hata oluştu.');
             console.error(error);
         } else {
             setSubmissions(submissions.map(s => s.id === id ? { ...s, payment_status: newStatus } : s));
@@ -311,7 +311,7 @@ export default function SubmissionsList() {
                 'Yaş Grubu': sub.data?.ageGroup || '',
                 'Misafir': sub.data?.bringGuest ? 'Evet (+1)' : 'Hayır',
                 'Misafir Adı': sub.data?.guestName || '',
-                'Ödeme Onayı': sub.data?.paymentApproval ? 'Onaylandı' : 'Bekliyor',
+                'Tahsilat Durumu': sub.payment_status === 'paid' ? 'Tahsil Edildi' : sub.payment_status === 'failed' ? 'Başarısız/İptal' : 'Bekliyor',
                 'Bilet Tipi': sub.ticket_type === 'asil' ? 'Asil' : sub.ticket_type === 'yedek' ? 'Yedek' : 'Bilinmiyor',
                 'Durum': sub.status === 'approved' ? 'Onaylandı' : sub.status === 'rejected' ? 'Reddedildi' : sub.status === 'cancelled' ? 'İptal Edildi' : 'Onay Bekliyor',
                 'Koltuk Tercihleri': seatingStr
@@ -418,7 +418,7 @@ export default function SubmissionsList() {
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Detaylar</th>
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Bilet & Tipi</th>
                                     <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Durum & Koltuk</th>
-                                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Ödeme</th>
+                                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider">Tahsilat Durumu</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 bg-white">
@@ -522,8 +522,8 @@ export default function SubmissionsList() {
                                                             sub.payment_status === 'failed' ? 'bg-red-50 text-red-800 ring-red-300 focus:ring-red-600' :
                                                                 'bg-amber-50 text-amber-800 ring-amber-300 focus:ring-amber-600'}`}
                                                 >
-                                                    <option value="pending">⏳ Bekliyor</option>
-                                                    <option value="paid">✅ Ödendi</option>
+                                                    <option value="pending">⏳ Tahsil Edilmedi</option>
+                                                    <option value="paid">✅ Tahsil Edildi</option>
                                                     <option value="failed">❌ Hatalı/İptal</option>
                                                 </select>
                                             </td>
@@ -568,9 +568,9 @@ export default function SubmissionsList() {
                                                 <span className="text-xs text-red-500">Not: Bu işlem kapasite istatistiklerini doğrudan etkileyecektir.</span></p>
                                         )}
                                         {confirmModal.type === 'single_payment' && (
-                                            <p>Seçilen adayın ödeme durumunu <strong>
+                                            <p>Seçilen adayın tahsilat durumunu <strong>
                                                 {confirmModal.payload.newStatus === 'paid' ? 'Tahsil Edildi' :
-                                                    confirmModal.payload.newStatus === 'failed' ? 'Başarısız/İptal' : 'Ödeme Bekliyor'}
+                                                    confirmModal.payload.newStatus === 'failed' ? 'Başarısız/İptal' : 'Tahsil Edilmedi'}
                                             </strong> olarak değiştirmek istediğinize emin misiniz?</p>
                                         )}
                                         {confirmModal.type === 'bulk_status' && (
