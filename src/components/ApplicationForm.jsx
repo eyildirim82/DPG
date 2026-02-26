@@ -8,6 +8,7 @@ import Button from './ui/Button';
 import { theme } from '../styles/theme';
 import { applicationFormSchema, isValidTCKimlikNo, FLEET_OPTIONS, AGE_GROUP_OPTIONS, AIRLINE_OPTIONS } from '../lib/validation';
 import { supabase } from '../lib/supabase';
+import { OPEN_DATE } from './CountdownTimer';
 
 const defaultValues = {
   tcNo: '',
@@ -47,7 +48,36 @@ export default function ApplicationForm({ onSubmitSuccess }) {
   const [deleting, setDeleting] = useState(false);
   const [tableStats, setTableStats] = useState([]);
   const [cancelToken, setCancelToken] = useState(() => localStorage.getItem('dpg_cancel_token') || null);
+  const [isOpen, setIsOpen] = useState(() => new Date() >= OPEN_DATE);
+  const [countdown, setCountdown] = useState(null);
   const firstErrorRef = useRef(null);
+
+  // Geri sayım
+  useEffect(() => {
+    if (isOpen) return;
+
+    const tick = () => {
+      const now = new Date();
+      const diff = OPEN_DATE - now;
+      if (diff <= 0) {
+        setIsOpen(true);
+        setCountdown(null);
+        return null;
+      }
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+      setCountdown({ days: d, hours: h, minutes: m, seconds: s });
+      return diff;
+    };
+
+    tick();
+    const timer = setInterval(() => {
+      if (tick() === null) clearInterval(timer);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isOpen]);
 
   useEffect(() => {
     if (step === 3) {
@@ -508,7 +538,36 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         {step === 2 && "T.C. Kimlik No doğrulandı. Başvuru formu açıldı. Lütfen bilgilerinizi eksiksiz doldurun."}
       </div>
 
-      {step === 1 ? (
+      {step === 1 && !isOpen && countdown ? (
+        /* -------- GERİ SAYIM -------- */
+        <div className="text-center">
+          <div className="grid grid-cols-4 gap-3 md:gap-4 mb-6">
+            {[
+              { label: 'Gün', value: countdown.days },
+              { label: 'Saat', value: countdown.hours },
+              { label: 'Dakika', value: countdown.minutes },
+              { label: 'Saniye', value: countdown.seconds },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex flex-col items-center">
+                <div
+                  className="w-full py-4 md:py-5 rounded-lg shadow-lg"
+                  style={{ background: 'linear-gradient(180deg, rgba(230,194,117,0.18) 0%, rgba(230,194,117,0.06) 100%)', border: '1px solid rgba(230,194,117,0.3)' }}
+                >
+                  <span className="text-3xl md:text-5xl font-bold tabular-nums text-dpg-gold">
+                    {String(value).padStart(2, '0')}
+                  </span>
+                </div>
+                <span className="mt-2 text-xs md:text-sm font-medium text-dpg-text-muted uppercase tracking-wider">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-dpg-text-muted text-sm md:text-base">
+            Başvuru sistemi otomatik olarak açılacaktır, lütfen bekleyiniz.
+          </p>
+        </div>
+      ) : step === 1 ? (
         <form onSubmit={handleTcSubmit} noValidate>
           <div className="mb-4">
             <FormInput
