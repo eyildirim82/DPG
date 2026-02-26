@@ -405,7 +405,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         if (error.message && error.message.includes('Kota dolmuştur')) {
           setApiError('Maalesef kotalarımız dolmuştur. İlginize teşekkür ederiz.');
         } else {
-          console.error(error);
+          console.error('submit_application error:', error);
           setApiError('Başvuru gönderilemedi. Lütfen tekrar deneyin veya bizimle iletişime geçin.');
         }
         return;
