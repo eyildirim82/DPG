@@ -487,7 +487,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         style={{ backgroundColor: 'rgba(230, 194, 117, 0.06)' }}
       >
         <p className="font-heading text-dpg-gold text-xl md:text-2xl font-semibold tracking-wide">
-          Katılım ücreti(): {bringGuest ? '6.000 ₺ (2 Kişi)' : '3.000 ₺'}
+          Katılım ücreti: {bringGuest ? '6.000 ₺ (2 Kişi)' : '3.000 ₺'}
         </p>
         <p className="text-dpg-text-muted text-sm md:text-base mt-2 font-body">
           Başvuru açılış: 2 Mart 2026, 10:00
