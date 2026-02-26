@@ -399,14 +399,15 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         p_tc_no: formData.tcNo,
         p_data: formData,
         p_bring_guest: formData.bringGuest,
-        p_user_id: session?.user?.id || null
+        p_user_id: session?.user?.id || null,
+        p_seating_preference: null
       });
 
       if (error) {
         if (error.message && error.message.includes('Kota dolmuştur')) {
           setApiError('Maalesef kotalarımız dolmuştur. İlginize teşekkür ederiz.');
         } else {
-          console.error(error);
+          console.error('submit_application error:', error);
           setApiError('Başvuru gönderilemedi. Lütfen tekrar deneyin veya bizimle iletişime geçin.');
         }
         return;
