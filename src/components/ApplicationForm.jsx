@@ -490,7 +490,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           Katılım ücreti: {bringGuest ? '6.000 TL (2 Kişi)' : '3.000 TL'}
         </p>
         <p className="text-dpg-text-muted text-sm md:text-base mt-2 font-body">
-          Başvuru açılış: 2 Mart 2026, 15:00
+          Başvuru açılış: 2 Mart 2026, 10:00
         </p>
 
       </div>
