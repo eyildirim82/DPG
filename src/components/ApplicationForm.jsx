@@ -541,7 +541,10 @@ export default function ApplicationForm({ onSubmitSuccess }) {
       {step === 1 && !isOpen && countdown ? (
         /* -------- GERİ SAYIM -------- */
         <div className="text-center">
-          <div className="grid grid-cols-4 gap-3 md:gap-4 mb-6">
+          <p className="text-dpg-text-muted text-sm md:text-base mb-6">
+            Başvuru sistemi otomatik olarak açılacaktır, lütfen bekleyiniz.
+          </p>
+          <div className="grid grid-cols-4 gap-3 md:gap-4">
             {[
               { label: 'Gün', value: countdown.days },
               { label: 'Saat', value: countdown.hours },
@@ -563,9 +566,6 @@ export default function ApplicationForm({ onSubmitSuccess }) {
               </div>
             ))}
           </div>
-          <p className="text-dpg-text-muted text-sm md:text-base">
-            Başvuru sistemi otomatik olarak açılacaktır, lütfen bekleyiniz.
-          </p>
         </div>
       ) : step === 1 ? (
         <form onSubmit={handleTcSubmit} noValidate>

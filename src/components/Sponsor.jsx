@@ -16,13 +16,13 @@ export default function Sponsor() {
           <span className="block w-[60px] h-px bg-dpg-gold mt-2.5 mx-auto" />
         </h2>
       </div>
-      <div className="bg-white rounded-xl border border-dpg-gold p-6 inline-block shadow-[0_4px_20px_rgba(230,194,117,0.15)] transition-transform hover:scale-105 duration-300">
+      <a href="https://www.talpa.org/haber/denizbank/" target="_blank" rel="noopener noreferrer" className="bg-white rounded-xl border border-dpg-gold p-6 inline-block shadow-[0_4px_20px_rgba(230,194,117,0.15)] transition-transform hover:scale-105 duration-300 cursor-pointer">
         <img
           src="/denizbank-logo.svg"
           alt="DenizBank"
           className="h-10 md:h-14 lg:h-16 w-auto object-contain mx-auto mix-blend-multiply"
         />
-      </div>
+      </a>
     </motion.section>
   );
 }

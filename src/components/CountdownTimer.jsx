@@ -58,13 +58,22 @@ export default function CountdownTimer({ onComplete }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
             </div>
-
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                 Başvurular Yakında Açılıyor
             </h3>
-            <p className="text-gray-500 mb-8 text-sm md:text-base">
+            <p className="text-gray-500 mb-4 text-sm md:text-base">
                 Başvuru sistemi <span className="font-semibold text-gray-700">2 Mart 2026, Pazartesi — 10:00</span> tarihinde açılacaktır.
             </p>
+
+            {/* Info banner */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700 mb-8">
+                <p className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" />
+                    </svg>
+                    Başvuru sistemi otomatik olarak açılacaktır, lütfen bekleyiniz.
+                </p>
+            </div>
 
             {/* Countdown Grid */}
             <div className="grid grid-cols-4 gap-3 md:gap-4 mb-8">
@@ -83,14 +92,7 @@ export default function CountdownTimer({ onComplete }) {
             </div>
 
             {/* Info banner */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
-                <p className="flex items-center justify-center gap-2">
-                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd" />
-                    </svg>
-                    Başvuru sayfası otomatik olarak açılacaktır, lütfen bekleyiniz.
-                </p>
-            </div>
+           
         </div>
     );
 }
