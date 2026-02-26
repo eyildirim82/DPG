@@ -30,7 +30,7 @@ export default function Dashboard() {
                     { data: quotaData }
                 ] = await Promise.all([
                     supabase.from('cf_whitelist').select('*', { count: 'exact', head: true }),
-                    supabase.from('cf_submissions').select('*', { count: 'exact', head: true }),
+                    supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).not('status', 'in', '("cancelled","rejected","expired")'),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).in('status', ['approved', 'asil', 'yedek']),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
                     supabase.rpc('get_ticket_stats')

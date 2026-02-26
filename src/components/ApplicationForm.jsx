@@ -487,7 +487,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         style={{ backgroundColor: 'rgba(230, 194, 117, 0.06)' }}
       >
         <p className="font-heading text-dpg-gold text-xl md:text-2xl font-semibold tracking-wide">
-          Katılım ücreti: {bringGuest ? '6.000 TL (2 Kişi)' : '3.000 TL'}
+          Katılım ücreti(): {bringGuest ? '6.000 ₺ (2 Kişi)' : '3.000 ₺'}
         </p>
         <p className="text-dpg-text-muted text-sm md:text-base mt-2 font-body">
           Başvuru açılış: 2 Mart 2026, 10:00
@@ -624,7 +624,7 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                 Geçici Rezervasyon Süreniz
               </span>
               <span className="text-4xl text-white tracking-widest bg-dpg-gold/20 px-4 py-2 rounded-lg border border-dpg-gold/30">{timeLeft}</span>
-              <span className="text-sm text-dpg-gold/80 font-normal">Değerli Kaptanımız yeriniz geçici olarak ayrılmıştır. Lütfen kaydınızı tamamlayın.</span>
+              <span className="text-sm text-dpg-gold/80 font-normal">Değerli Kaptanımız yeriniz geçici olarak ayrılmıştır. Lütfen kaydınızı tamamlayınız.</span>
             </div>
           )}
 
@@ -1005,8 +1005,8 @@ export default function ApplicationForm({ onSubmitSuccess }) {
                         }}
                       >
                         {ticketType === 'yedek'
-                          ? `Yedek listede olduğumu anlıyorum. Asıl listeye geçmem durumunda ${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin tahsil edilmesini onaylıyorum.`
-                          : `${bringGuest ? '6.000 TL' : '3.000 TL'} ödemenin TALPA'ya kayıtlı kredi kartımdan tahsil edilmesini onaylıyorum.`}
+                          ? `Yedek listede olduğumu anlıyorum. Asıl listeye geçmem durumunda ${bringGuest ? '6.000 ₺' : '3.000 ₺'} ödemenin tahsil edilmesini onaylıyorum.`
+                          : `${bringGuest ? '6.000 ₺' : '3.000 ₺'} ödemenin TALPA'ya kayıtlı kredi kartımdan tahsil edilmesini onaylıyorum.`}
                       </span>
                     </label>
                     {errors.paymentApproval && (
