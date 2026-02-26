@@ -398,7 +398,8 @@ export default function ApplicationForm({ onSubmitSuccess }) {
         p_tc_no: formData.tcNo,
         p_data: formData,
         p_bring_guest: formData.bringGuest,
-        p_user_id: session?.user?.id || null
+        p_user_id: session?.user?.id || null,
+        p_seating_preference: null
       });
 
       if (error) {
