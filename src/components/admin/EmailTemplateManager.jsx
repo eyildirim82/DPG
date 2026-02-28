@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Mail, Plus, Edit3, Trash2, Eye, Save, X, ToggleLeft, ToggleRight, AlertCircle, CheckCircle2, Loader2, Copy } from 'lucide-react';
+import { Mail, Plus, Edit3, Trash2, Eye, Save, X, ToggleLeft, ToggleRight, AlertCircle, CheckCircle2, Loader2, Copy, Download, Palette } from 'lucide-react';
+import { DEFAULT_TEMPLATES, wrapEmailHtml } from '../../lib/emailTemplates';
 
 const CATEGORY_LABELS = { applicant: 'Başvurana', admin: 'Admine' };
 const CATEGORY_COLORS = { applicant: 'bg-blue-100 text-blue-700', admin: 'bg-purple-100 text-purple-700' };
@@ -137,21 +138,29 @@ export default function EmailTemplateManager() {
         let html = editTemplate.body_html;
         const sampleData = {
             name: 'Ahmet Yılmaz',
-            ticket_label: 'Asil Liste',
+            ticket_label: 'YEDEK LİSTEDE',
+            yedek_sira_bilgisi: '<p style="margin:10px 0 0; font-size:15px; font-weight:700; color:#b45309; font-family:Segoe UI,sans-serif;">Yedek Sıranız: #5</p>',
             old_label: 'Yedek Liste',
             new_label: 'Asil Liste',
-            tc_no: '12345678901',
+            tc_no: '123****8901',
             airline: 'THY',
             fleet: 'B737',
             sequence_number: '42',
             guest_label: '✅ Evet (+1)',
-            sender_name: 'Test Gönderici',
-            sender_email: 'test@example.com',
-            subject: 'Test Konu',
-            message: 'Bu bir test mesajıdır.',
+            sender_name: 'Mehmet Demir',
+            sender_email: 'mehmet@example.com',
+            subject: 'Etkinlik hakkında bilgi almak istiyorum',
+            message: 'Merhaba, DPG 2026 etkinliği hakkında detaylı bilgi alabilir miyim? Teşekkürler.',
+            asil_filled: '185',
+            asil_total: '200',
+            asil_remaining: '15',
+            yedek_filled: '90',
+            yedek_total: '100',
+            yedek_remaining: '10',
         };
         html = html.replace(/\{\{(\w+)\}\}/g, (m, key) => sampleData[key] || m);
-        setPreviewHtml(html);
+        // Wrap with header/footer for full preview
+        setPreviewHtml(wrapEmailHtml(html));
     };
 
     const [newVar, setNewVar] = useState('');
@@ -164,6 +173,45 @@ export default function EmailTemplateManager() {
     const removeVariable = (v) => {
         if (!editTemplate) return;
         setEditTemplate({ ...editTemplate, variables: editTemplate.variables.filter(x => x !== v) });
+    };
+
+    const loadDefaultTemplates = async () => {
+        const confirmed = window.confirm(
+            `${DEFAULT_TEMPLATES.length} adet profesyonel e-posta şablonu yüklenecek.\n\nMevcut aynı slug'a sahip şablonlar güncellenmeyecek, sadece yeni slug'lar eklenecek.\n\nDevam etmek istiyor musunuz?`
+        );
+        if (!confirmed) return;
+        setSaving(true);
+        let added = 0;
+        let skipped = 0;
+        try {
+            const existingSlugs = templates.map(t => t.slug);
+            for (const tpl of DEFAULT_TEMPLATES) {
+                if (existingSlugs.includes(tpl.slug)) {
+                    skipped++;
+                    continue;
+                }
+                const { error } = await supabase.from('cf_email_templates').insert({
+                    slug: tpl.slug,
+                    name: tpl.name,
+                    subject: tpl.subject,
+                    body_html: tpl.body_html,
+                    category: tpl.category,
+                    variables: tpl.variables || [],
+                    is_active: true,
+                    is_system: true,
+                });
+                if (error) {
+                    console.error(`Şablon eklenemedi (${tpl.slug}):`, error);
+                } else {
+                    added++;
+                }
+            }
+            showToast(`${added} şablon eklendi${skipped > 0 ? `, ${skipped} zaten mevcut` : ''}.`);
+            fetchTemplates();
+        } catch (err) {
+            showToast('Hata: ' + err.message, 'error');
+        }
+        setSaving(false);
     };
 
     return (
@@ -185,10 +233,16 @@ export default function EmailTemplateManager() {
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">Otomatik e-posta şablonlarını yönetin, düzenleyin veya yeni ekleyin.</p>
                 </div>
-                <button onClick={openNew} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
-                    <Plus className="w-4 h-4" />
-                    Yeni Şablon
-                </button>
+                <div className="flex items-center gap-2">
+                    <button onClick={loadDefaultTemplates} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors shadow-sm disabled:opacity-50" title="Profesyonel varsayılan şablonları yükle">
+                        <Download className="w-4 h-4" />
+                        Hazır Şablonlar
+                    </button>
+                    <button onClick={openNew} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                        <Plus className="w-4 h-4" />
+                        Yeni Şablon
+                    </button>
+                </div>
             </div>
 
             {/* Table */}
@@ -460,13 +514,15 @@ export default function EmailTemplateManager() {
                             {previewHtml && (
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
-                                        <label className="text-sm font-semibold text-gray-700">📧 Önizleme</label>
+                                        <label className="text-sm font-semibold text-gray-700">📧 Tam Önizleme (Header + İçerik + Footer)</label>
                                         <button onClick={() => setPreviewHtml(null)} className="text-xs text-gray-400 hover:text-gray-600">Kapat</button>
                                     </div>
-                                    <div className="border border-gray-200 rounded-lg overflow-hidden bg-[#0D0D0D] p-6">
-                                        <div
-                                            className="mx-auto max-w-[600px] text-white"
-                                            dangerouslySetInnerHTML={{ __html: previewHtml }}
+                                    <div className="border border-gray-200 rounded-lg overflow-hidden bg-[#f4f6f9]">
+                                        <iframe
+                                            title="E-posta Önizleme"
+                                            srcDoc={previewHtml}
+                                            style={{ width: '100%', minHeight: '700px', border: 'none' }}
+                                            sandbox="allow-same-origin"
                                         />
                                     </div>
                                 </div>

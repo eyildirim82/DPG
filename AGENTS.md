@@ -20,9 +20,15 @@ npm run build
 A `.env` file is required at the repo root with:
 - `VITE_SUPABASE_URL` — Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` — Supabase anonymous API key
-- `VITE_ADMIN_PASSWORD` — password for the admin panel (`/admin/login`)
 
-The `.env` file is gitignored. If these secrets are set as environment variables (e.g. via Cursor Secrets), the `.env` file is created automatically during setup. Without real Supabase credentials the frontend loads and admin login works, but data-dependent features (whitelist, submissions, dashboard stats) will fail.
+The `.env` file is gitignored. If these secrets are set as environment variables (e.g. via Cursor Secrets), the `.env` file is created automatically during setup. Without real Supabase credentials the frontend loads but data-dependent features (whitelist, submissions, dashboard stats) will fail.
+
+Optional feature flags:
+- `VITE_ENABLE_APPLICATION_COUNTDOWN` — set to `false` to disable the public application countdown and open the form immediately.
+
+The countdown can also be managed from Admin > Kota Ayarları. If Supabase is reachable, this DB setting overrides the env flag at runtime.
+
+Admin login uses **Supabase Auth** (email+password). The admin user `dpg@talpa.org` is pre-created in the Supabase Auth table.
 
 ### Linting / Testing
 No ESLint config or test framework is currently configured in this repo. There are no `lint` or `test` npm scripts.
@@ -31,8 +37,8 @@ No ESLint config or test framework is currently configured in this repo. There a
 | Route | Description |
 |---|---|
 | `/` | Public landing page |
-| `/apply` | Dynamic application form |
-| `/admin/login` | Admin password login |
+| `/apply` | Disabled — redirects to `/` |
+| `/admin/login` | Admin Supabase Auth login |
 | `/admin` | Admin dashboard (protected) |
 | `/admin/whitelist` | Whitelist management |
 | `/admin/submissions` | Application submissions |
@@ -41,16 +47,16 @@ No ESLint config or test framework is currently configured in this repo. There a
 | `/admin/quota` | Quota settings |
 
 ### .env file setup for Cloud Agents
-When Cursor Secrets (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_ADMIN_PASSWORD`) are injected as environment variables, write them to `.env` before starting the dev server:
+When Cursor Secrets (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) are injected as environment variables, write them to `.env` before starting the dev server:
 ```bash
 echo "VITE_SUPABASE_URL=${VITE_SUPABASE_URL}" > .env
 echo "VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}" >> .env
-echo "VITE_ADMIN_PASSWORD=${VITE_ADMIN_PASSWORD}" >> .env
 ```
 Vite reads `VITE_*` vars from `.env` at startup — changing the file requires a dev server restart to take effect.
 
 ### Gotchas
 - Node.js 20 is required (pinned in `.nvmrc` and `package.json` engines).
-- Admin auth is client-side only — `sessionStorage` key `dpg_admin_authenticated` is set on successful login.
-- The Supabase client (`src/lib/supabase.js`) will throw if `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are undefined, but the app still renders the public page.
+- Admin auth uses Supabase Auth (`signInWithPassword`). The `ProtectedRoute` component checks active session via `supabase.auth.getSession()`.
+- The Supabase client (`src/lib/supabase.js`) returns `null` if `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are undefined, but the app still renders the public page.
 - The Supabase anon key provided via secrets is a publishable key (safe for client-side use).
+- Route-level code splitting is active — all pages are lazy-loaded via `React.lazy()`.

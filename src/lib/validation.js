@@ -9,8 +9,7 @@ export function isValidTCKimlikNo(val) {
   const d = digits.split('').map(Number);
   const sum13579 = d[0] + d[2] + d[4] + d[6] + d[8];
   const sum2468 = d[1] + d[3] + d[5] + d[7];
-  const digit10 = (sum13579 * 7 - sum2468) % 10;
-  if (digit10 < 0) return false;
+  const digit10 = ((sum13579 * 7 - sum2468) % 10 + 10) % 10;
   if (d[9] !== digit10) return false;
   const digit11 = (d.slice(0, 10).reduce((a, b) => a + b, 0)) % 10;
   if (d[10] !== digit11) return false;
@@ -25,6 +24,32 @@ const tcNoSchema = z
     'TC Kimlik No 11 rakamdan oluşmalıdır.'
   )
   .refine((val) => isValidTCKimlikNo(val), 'Geçerli bir TC Kimlik No giriniz.');
+
+/**
+ * Telefon numarasını 5XX XXX XX XX formatına dönüştürür.
+ * Başındaki 0, +90, 90 gibi prefixleri otomatik siler.
+ * Sadece 5 ile başlayan 10 haneli TR cep numaraları formatlanır.
+ */
+export function formatPhoneNumber(raw) {
+  if (!raw) return '';
+  // Rakam dışı her şeyi sil
+  let digits = raw.replace(/\D/g, '');
+  // +90 veya 90 prefix'ini sil
+  if (digits.startsWith('90') && digits.length > 10) {
+    digits = digits.slice(2);
+  }
+  // Baştaki 0'ı sil (05xx → 5xx)
+  if (digits.startsWith('0') && digits.length > 10) {
+    digits = digits.slice(1);
+  }
+  // Maksimum 10 hane
+  digits = digits.slice(0, 10);
+  // Formatlı çıktı: 5XX XXX XX XX
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
+  if (digits.length <= 8) return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+  return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 8)} ${digits.slice(8)}`;
+}
 
 const fullNameMinWords = (val) => {
   if (!val || typeof val !== 'string') return false;
@@ -81,8 +106,12 @@ export const applicationFormSchema = z
       .string()
       .min(1, 'Telefon numarası zorunludur.')
       .refine(
-        (val) => (val && val.replace(/\D/g, '').length >= 10) || false,
-        'Geçerli bir telefon numarası giriniz (en az 10 hane).'
+        (val) => {
+          if (!val) return false;
+          const digits = val.replace(/\D/g, '');
+          return digits.length === 10 && digits.startsWith('5');
+        },
+        'Geçerli bir cep telefonu numarası giriniz (5XX XXX XX XX).'
       ),
     ageGroup: z.string().min(1, 'Lütfen yaş aralığı seçiniz.'),
     bringGuest: z.boolean().optional().default(false),

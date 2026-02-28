@@ -1,0 +1,32 @@
+Dual Asil Pool — Large Stress Test (1000 users)
+
+Summary:
+- Concurrent users: 1000 (Returning:500 / New:500)
+- Wave size: 50
+
+Lock results:
+- Successful locks: 925
+- Rejected (quota_full): 75
+- Lock latency p50/p95/p99: 180ms / 264ms / 327ms
+
+Submit results:
+- Successful submissions: 925
+- Rejected: 0
+- Submit latency p50/p95/p99: 188ms / 250ms / 266ms
+
+Pool breakdown (after submit):
+- Returning: Asil 400  Yedek 72  (capacity 400)
+- New:       Asil 300  Yedek 153 (capacity 300)
+
+Observations:
+- The system rejected 75 requests due to `quota_full` as expected when approaching total_capacity + buffer.
+- Submissions completed atomically for locked slots (925).
+- Post-test reserved totals and pool aggregates indicate > asil_capacity when including yedek counts; cleanup restored initial state but reported mismatch warning (investigate cleanup idempotency or concurrent side-effects).
+
+Artifacts:
+- Raw log: tests/stress/reports/quota-race-1000users-20260228.txt
+
+Next steps (recommendations):
+- Run boundary test to drive pools to exact capacity and observe `yedek` allocation.
+- Investigate cleanup mismatch and any race conditions in cleanup scripts.
+- If you want, I can run the boundary test next (e.g., users = 2000) or start debugging cleanup logic.
