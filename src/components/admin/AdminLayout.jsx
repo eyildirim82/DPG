@@ -1,13 +1,14 @@
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Settings, Users, LogOut, MessageSquare, Ticket, Mail } from 'lucide-react';
+import { LayoutDashboard, FileText, Settings, Users, LogOut, MessageSquare, Ticket, Mail, Server } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminLayout() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        sessionStorage.removeItem('dpg_admin_authenticated');
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
         navigate('/admin/login');
     };
 
@@ -18,6 +19,7 @@ export default function AdminLayout() {
         { name: 'İletişim Yönetimi', path: '/admin/communication', icon: MessageSquare },
         { name: 'E-posta Şablonları', path: '/admin/email-templates', icon: Mail },
         { name: 'Kota Ayarları', path: '/admin/quota', icon: Ticket },
+        { name: 'SMTP Ayarları', path: '/admin/smtp', icon: Server },
     ];
 
     return (

@@ -1,35 +1,49 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import PublicPage from './pages/PublicPage';
-import AdminLayout from './components/admin/AdminLayout';
-import Dashboard from './components/admin/Dashboard';
-import SubmissionsList from './components/admin/SubmissionsList';
-import WhitelistManager from './components/admin/WhitelistManager';
-import CommunicationManager from './components/admin/CommunicationManager';
-import EmailTemplateManager from './components/admin/EmailTemplateManager';
-import QuotaSettings from './components/admin/QuotaSettings';
-import AdminLogin from './components/admin/AdminLogin';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/admin/ProtectedRoute';
-import DynamicFormPage from './pages/DynamicFormPage';
+
+// Lazy-loaded route components (code-splitting)
+const PublicPage = lazy(() => import('./pages/PublicPage'));
+const AdminLogin = lazy(() => import('./components/admin/AdminLogin'));
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const Dashboard = lazy(() => import('./components/admin/Dashboard'));
+const SubmissionsList = lazy(() => import('./components/admin/SubmissionsList'));
+const WhitelistManager = lazy(() => import('./components/admin/WhitelistManager'));
+const CommunicationManager = lazy(() => import('./components/admin/CommunicationManager'));
+const EmailTemplateManager = lazy(() => import('./components/admin/EmailTemplateManager'));
+const QuotaSettings = lazy(() => import('./components/admin/QuotaSettings'));
+const SmtpSettings = lazy(() => import('./components/admin/SmtpSettings'));
+
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<PublicPage />} />
-        <Route path="/apply" element={<DynamicFormPage />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="whitelist" element={<WhitelistManager />} />
-            <Route path="submissions" element={<SubmissionsList />} />
-            <Route path="communication" element={<CommunicationManager />} />
-            <Route path="email-templates" element={<EmailTemplateManager />} />
-            <Route path="quota" element={<QuotaSettings />} />
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<PublicPage />} />
+          {/* /apply route disabled — bypasses quota/lock RPC flow (see audit report #7) */}
+          <Route path="/apply" element={<Navigate to="/" replace />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="whitelist" element={<WhitelistManager />} />
+              <Route path="submissions" element={<SubmissionsList />} />
+              <Route path="communication" element={<CommunicationManager />} />
+              <Route path="email-templates" element={<EmailTemplateManager />} />
+              <Route path="quota" element={<QuotaSettings />} />
+              <Route path="smtp" element={<SmtpSettings />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

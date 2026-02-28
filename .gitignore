@@ -5,3 +5,7 @@ dist
 .env
 .env.local
 .env.*.local
+
+# SMTP test files (contain credentials)
+smtp-test.js
+test-email.js

@@ -1,12 +1,23 @@
 import nodemailer from 'nodemailer';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+
+if (!SMTP_USER || !SMTP_PASS) {
+  console.error('SMTP_USER ve SMTP_PASS environment variable tanımlı olmalı!');
+  process.exit(1);
+}
+
 const transporter = nodemailer.createTransport({
   host: 'smtp-mail.outlook.com',
   port: 587,
   secure: false,
   auth: {
-    user: 'dpg@talpa.org',
-    pass: 'Talpa.123'
+    user: SMTP_USER,
+    pass: SMTP_PASS
   },
   tls: {
     ciphers: 'SSLv3'
@@ -16,8 +27,7 @@ const transporter = nodemailer.createTransport({
 async function testSmtp() {
   console.log('SMTP bağlantısı test ediliyor...');
   console.log('Sunucu: smtp-mail.outlook.com:587');
-  console.log('Kullanıcı: dpg@talpa.org');
-  console.log('Alıcı: e.yildirim9315@gmail.com');
+  console.log(`Kullanıcı: ${SMTP_USER}`);
   console.log('---');
 
   try {
@@ -27,8 +37,8 @@ async function testSmtp() {
 
     // Test e-postası gönder
     const info = await transporter.sendMail({
-      from: '"DPG - Talpa" <dpg@talpa.org>',
-      to: 'e.yildirim9315@gmail.com',
+      from: `"DPG - Talpa" <${SMTP_USER}>`,
+      to: SMTP_USER, // test: kendine gönder
       subject: 'SMTP Test - ' + new Date().toLocaleString('tr-TR'),
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
