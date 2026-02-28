@@ -478,6 +478,42 @@ describe.skipIf(!canConnect)('Gelişmiş RLS Güvenlik — Cross-User & Paramete
 
       expect(error).not.toBeNull();
     });
+
+    it('submit_application: borçlu üye DB tarafında reddedilir (debtor bypass kapalı)', async () => {
+      const { error } = await supabase.rpc('submit_application', {
+        p_tc_no: '44444444440',
+        p_data: { name: 'Debtor Test' },
+        p_bring_guest: false,
+      });
+
+      expect(error).not.toBeNull();
+      expect((error?.message || '').toLowerCase()).toContain('aidat borcunuz bulunmaktadır');
+    });
+
+    it('submit_application: mükerrer başvuru hard reject edilir', async () => {
+      const tcNo = '11111111110';
+
+      const first = await supabase.rpc('submit_application', {
+        p_tc_no: tcNo,
+        p_data: { name: 'Duplicate Check 1', email: 'dup1@example.com' },
+        p_bring_guest: false,
+      });
+
+      const firstMsg = (first.error?.message || '').toLowerCase();
+      if (first.error && firstMsg.includes('daha önce başvuru yapılmıştır')) {
+        expect(first.error).not.toBeNull();
+        return;
+      }
+
+      const second = await supabase.rpc('submit_application', {
+        p_tc_no: tcNo,
+        p_data: { name: 'Duplicate Check 2', email: 'dup2@example.com' },
+        p_bring_guest: false,
+      });
+
+      expect(second.error).not.toBeNull();
+      expect((second.error?.message || '').toLowerCase()).toContain('daha önce başvuru yapılmıştır');
+    });
   });
 
   // ──────────────────────────────────────────────

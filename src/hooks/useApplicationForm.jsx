@@ -89,8 +89,8 @@ export default function useApplicationForm({ onSubmitSuccess }) {
       if (diff <= 0) {
         setTimeLeft('Süreniz doldu');
         setRemainingSeconds(0);
+        resetToStep1(); // [FIX] Clear all state including TC input
         setApiError('10 dakikalık kayıt süreniz dolmuştur. Lütfen tekrar TC giriniz.');
-        setStep(1);
         return;
       }
       const totalSecs = Math.ceil(diff / 1000);

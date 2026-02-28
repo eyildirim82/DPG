@@ -1,0 +1,89 @@
+Dual Asil Pool — Quota Race Condition Stress Test
+Kullanıcı: 50 (Geri dönen: 25, Yeni: 25)
+Dalga boyutu: 10
+Asil Havuzları: Geri dönen=400, Yeni=300
+
+🔑 Admin oturumu açılıyor...
+   ✅ Admin oturumu açıldı (dpg@talpa.org)
+
+🌱 Whitelist'e test TC'leri ekleniyor...
+   Geri dönen: 25  |  Yeni üye: 25
+   Dalga 1/5 (10 istek)... 815ms
+   Dalga 2/5 (10 istek)... 278ms
+   Dalga 3/5 (10 istek)... 146ms
+   Dalga 4/5 (10 istek)... 118ms
+   Dalga 5/5 (10 istek)... 202ms
+   ✅ 50 test TC'si whitelist'e eklendi.
+
+🔓 Admin oturumu kapatıldı — bundan sonra anon olarak devam ediliyor.
+
+📊 Mevcut kota durumu kontrol ediliyor...
+   Toplam kapasite: 1500
+   Toplam rezerv: 0
+   Kalan: 1500
+   Asil havuzları:
+     Geri dönen: 0/400
+     Yeni üye:   0/300
+
+🧪 50 kullanıcı simüle ediliyor (25 geri dönen, 25 yeni)...
+
+🔒 check_and_lock_slot çağrıları başlatılıyor...
+   Dalga 1/5 (10 istek)... 262ms
+   Dalga 2/5 (10 istek)... 137ms
+   Dalga 3/5 (10 istek)... 133ms
+   Dalga 4/5 (10 istek)... 139ms
+   Dalga 5/5 (10 istek)... 133ms
+   Toplam süre: 805ms
+   Latency  → min: 94ms | p50: 117ms | p95: 246ms | p99: 261ms | max: 261ms     
+
+📋 Lock Sonuçları:
+   ✅ Başarılı slot kilitleme: 50
+   ❌ Reddedilen: 0
+
+   🏊 Dual Asil Havuz Dağılımı (Lock):
+     Geri dönen → Asil: 25  Yedek: 0  (havuz kapasitesi: 400)
+     Yeni üye   → Asil: 25  Yedek: 0  (havuz kapasitesi: 300)
+
+📝 50 başarılı lock için submit_application çağrıları...
+   Dalga 1/5 (10 istek)... 148ms
+   Dalga 2/5 (10 istek)... 171ms
+   Dalga 3/5 (10 istek)... 125ms
+   Dalga 4/5 (10 istek)... 138ms
+   Dalga 5/5 (10 istek)... 191ms
+   Toplam süre: 776ms
+   Latency  → min: 95ms | p50: 147ms | p95: 191ms | p99: 191ms | max: 191ms     
+   ✅ Başarılı başvuru: 50
+   ❌ Reddedilen: 0
+
+   🏊 Dual Asil Havuz Dağılımı (Submit):
+     Geri dönen → Asil: 25  Yedek: 0  (havuz kapasitesi: 400)
+     Yeni üye   → Asil: 25  Yedek: 0  (havuz kapasitesi: 300)
+
+📊 Test sonrası kota durumu:
+   Toplam rezerv: 50
+   Kalan: 1450
+   Asil havuzları:
+     Geri dönen: 25/400
+     Yeni üye:   25/300
+   Bu test sırasında artan: +50
+
+🧹 Test verileri temizleniyor...
+   Dalga 1/5 (10 istek)... 151ms
+   Dalga 2/5 (10 istek)... 114ms
+   Dalga 3/5 (10 istek)... 110ms
+   Dalga 4/5 (10 istek)... 111ms
+   Dalga 5/5 (10 istek)... 135ms
+   Temizlik tamamlandı (622ms).
+
+🔑 Admin oturumu açılıyor...
+   ✅ Admin oturumu açıldı (dpg@talpa.org)
+
+🧹 Whitelist test verileri temizleniyor...
+   Dalga 1/5 (10 istek)... 105ms
+   Dalga 2/5 (10 istek)... 280ms
+   Dalga 3/5 (10 istek)... 134ms
+   Dalga 4/5 (10 istek)... 243ms
+   Dalga 5/5 (10 istek)... 140ms
+   Whitelist temizlendi (904ms).
+
+SONUÇ: 50 concurrent kullanıcı başarılı şekilde lock ve submit oldu; dual havuz kuralları gözetildi.

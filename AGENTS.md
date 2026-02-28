@@ -23,6 +23,11 @@ A `.env` file is required at the repo root with:
 
 The `.env` file is gitignored. If these secrets are set as environment variables (e.g. via Cursor Secrets), the `.env` file is created automatically during setup. Without real Supabase credentials the frontend loads but data-dependent features (whitelist, submissions, dashboard stats) will fail.
 
+Optional feature flags:
+- `VITE_ENABLE_APPLICATION_COUNTDOWN` — set to `false` to disable the public application countdown and open the form immediately.
+
+The countdown can also be managed from Admin > Kota Ayarları. If Supabase is reachable, this DB setting overrides the env flag at runtime.
+
 Admin login uses **Supabase Auth** (email+password). The admin user `dpg@talpa.org` is pre-created in the Supabase Auth table.
 
 ### Linting / Testing

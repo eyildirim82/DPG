@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import FormInput from './ui/FormInput';
@@ -9,8 +9,78 @@ import { FLEET_OPTIONS, AGE_GROUP_OPTIONS, AIRLINE_OPTIONS, formatPhoneNumber } 
 import useApplicationForm from '../hooks/useApplicationForm.jsx';
 import TCVerifyStep from './form/TCVerifyStep';
 import SeatingStep from './form/SeatingStep';
+import { OPEN_DATE } from './CountdownTimer';
+import { supabase } from '../lib/supabase';
+
+const envCountdownEnabled = import.meta.env.VITE_ENABLE_APPLICATION_COUNTDOWN !== 'false';
 
 export default function ApplicationForm({ onSubmitSuccess }) {
+  /* ───── Countdown state (başvuru açılış: 2 Mart 2026, 10:00) ───── */
+  const [countdownEnabled, setCountdownEnabled] = useState(envCountdownEnabled);
+  const [isOpen, setIsOpen] = useState(() => !envCountdownEnabled || new Date() >= OPEN_DATE);
+  const [countdown, setCountdown] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchCountdownSetting = async () => {
+      if (!supabase) return;
+
+      try {
+        const { data, error } = await supabase.rpc('get_application_countdown_enabled');
+        if (error) throw error;
+
+        if (isMounted && typeof data === 'boolean') {
+          setCountdownEnabled(data);
+        }
+      } catch (err) {
+        console.error('Countdown setting could not be loaded, env fallback will be used:', err);
+      }
+    };
+
+    fetchCountdownSetting();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!countdownEnabled) {
+      setIsOpen(true);
+      setCountdown(null);
+      return;
+    }
+
+    setIsOpen(new Date() >= OPEN_DATE);
+  }, [countdownEnabled]);
+
+  useEffect(() => {
+    if (!countdownEnabled || isOpen) return;
+
+    const tick = () => {
+      const now = new Date();
+      const diff = OPEN_DATE - now;
+      if (diff <= 0) {
+        setIsOpen(true);
+        setCountdown(null);
+        return null;
+      }
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+      setCountdown({ days: d, hours: h, minutes: m, seconds: s });
+      return diff;
+    };
+
+    tick();
+    const timer = setInterval(() => {
+      if (tick() === null) clearInterval(timer);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isOpen, countdownEnabled]);
+
   const {
     step,
     setStep,
@@ -105,7 +175,39 @@ export default function ApplicationForm({ onSubmitSuccess }) {
       </div>
 
       {/* ═══════════════ STEP 1 — TC Verification ═══════════════ */}
-      {isQuotaFull ? (
+      {/* ═══════════════ COUNTDOWN — Başvuru henüz açılmadıysa ═══════════════ */}
+      {step === 1 && countdownEnabled && !isOpen && countdown ? (
+        <div className="text-center">
+          <div className="grid grid-cols-4 gap-3 md:gap-4 mb-6">
+            {[
+              { label: 'Gün', value: countdown.days },
+              { label: 'Saat', value: countdown.hours },
+              { label: 'Dakika', value: countdown.minutes },
+              { label: 'Saniye', value: countdown.seconds },
+            ].map(({ label, value }) => (
+              <div key={label} className="flex flex-col items-center">
+                <div
+                  className="w-full py-4 md:py-5 rounded-lg shadow-lg"
+                  style={{
+                    background: 'linear-gradient(180deg, rgba(230,194,117,0.18) 0%, rgba(230,194,117,0.06) 100%)',
+                    border: '1px solid rgba(230,194,117,0.3)',
+                  }}
+                >
+                  <span className="text-3xl md:text-5xl font-bold tabular-nums text-dpg-gold">
+                    {String(value).padStart(2, '0')}
+                  </span>
+                </div>
+                <span className="mt-2 text-xs md:text-sm font-medium text-dpg-text-muted uppercase tracking-wider">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-dpg-text-muted text-sm md:text-base">
+            Başvuru sistemi otomatik olarak açılacaktır, lütfen bekleyiniz.
+          </p>
+        </div>
+      ) : isQuotaFull ? (
         <div className="mb-8">
           <div
             role="status"

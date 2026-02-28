@@ -128,6 +128,14 @@ const FALLBACK: Record<string, { subject: string; body: string }> = {
     subject: 'Başvurunuz İptal Edildi — DPG 2026',
     body: '<h2 style="color:#051424;">Sayın {{name}},</h2><p style="color:#333;font-size:15px;line-height:1.6;">DPG 2026 etkinlik başvurunuz <strong style="color:#d97706;">iptal edilmiştir</strong>.</p><p style="color:#666;font-size:14px;">Sorularınız için <a href="mailto:dpg@talpa.org" style="color:#E6C275;">dpg@talpa.org</a> adresinden bize ulaşabilirsiniz.</p>',
   },
+  application_received: {
+    subject: 'Başvurunuz Alındı — DPG 2026',
+    body: '<h2 style="color:#051424;">Sayın {{name}},</h2><p style="color:#333;font-size:15px;line-height:1.6;">DPG 2026 etkinlik başvurunuz başarıyla alınmıştır.</p><p style="color:#333;font-size:15px;">Durum: <strong>{{ticket_label}}</strong></p><p style="color:#666;font-size:14px;">{{yedek_sira_bilgisi}}</p><p style="color:#666;font-size:14px;">Detaylar için <a href="https://dpg.talpa.org" style="color:#E6C275;">dpg.talpa.org</a> adresini ziyaret edebilirsiniz.</p>',
+  },
+  admin_new_application: {
+    subject: 'Yeni Başvuru: {{name}}',
+    body: '<h2 style="color:#051424;">Yeni DPG Başvurusu</h2><p><strong>İsim:</strong> {{name}}</p><p><strong>TC No:</strong> {{tc_no}}</p><p><strong>Durum:</strong> {{ticket_label}}</p><p><strong>Misafir:</strong> {{guest_label}}</p>',
+  },
 };
 
 // ── Email wrapper ────────────────────────

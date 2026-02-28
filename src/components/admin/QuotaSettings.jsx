@@ -7,6 +7,7 @@ export default function QuotaSettings() {
         asil_returning_capacity: 400,
         asil_new_capacity: 300,
         total_capacity: 1500,
+        countdown_enabled: true,
     });
     const [original, setOriginal] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -29,6 +30,7 @@ export default function QuotaSettings() {
                     asil_returning_capacity: data.asil_returning_capacity,
                     asil_new_capacity: data.asil_new_capacity,
                     total_capacity: data.total_capacity,
+                    countdown_enabled: data.countdown_enabled ?? true,
                 };
                 setSettings(s);
                 setOriginal(s);
@@ -61,6 +63,7 @@ export default function QuotaSettings() {
                     asil_returning_capacity: settings.asil_returning_capacity,
                     asil_new_capacity: settings.asil_new_capacity,
                     total_capacity: settings.total_capacity,
+                    countdown_enabled: settings.countdown_enabled,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', settings.id);
@@ -80,7 +83,8 @@ export default function QuotaSettings() {
     const hasChanges = original && (
         settings.asil_returning_capacity !== original.asil_returning_capacity ||
         settings.asil_new_capacity !== original.asil_new_capacity ||
-        settings.total_capacity !== original.total_capacity
+        settings.total_capacity !== original.total_capacity ||
+        settings.countdown_enabled !== original.countdown_enabled
     );
 
     const asilTotal = settings.asil_returning_capacity + settings.asil_new_capacity;
@@ -128,6 +132,12 @@ export default function QuotaSettings() {
                         <div className="text-blue-200 text-xs mt-1">Yedek Kota</div>
                     </div>
                 </div>
+                <div className="mt-4 border-t border-white/15 pt-4 flex items-center justify-between">
+                    <span className="text-blue-100 text-sm">Başvuru Geri Sayımı</span>
+                    <span className={`text-sm font-semibold ${settings.countdown_enabled ? 'text-green-300' : 'text-red-300'}`}>
+                        {settings.countdown_enabled ? 'Açık' : 'Kapalı'}
+                    </span>
+                </div>
             </div>
 
             {/* Settings Form */}
@@ -172,6 +182,23 @@ export default function QuotaSettings() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg font-bold text-center bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
+                </div>
+
+                <div className="mt-6 border-t border-gray-200 pt-6">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.countdown_enabled}
+                            onChange={(e) => setSettings({ ...settings, countdown_enabled: e.target.checked })}
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-gray-700">Başvuru geri sayımını göster</span>
+                            <span className="block text-xs text-gray-500 mt-1">
+                                Kapalı olduğunda başvuru formu geri sayımı beklemeden doğrudan açılır.
+                            </span>
+                        </span>
+                    </label>
                 </div>
 
                 {asilTotal > settings.total_capacity && (
