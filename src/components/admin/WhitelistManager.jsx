@@ -29,7 +29,11 @@ export default function WhitelistManager() {
 
     const fetchWhitelist = async () => {
         setLoading(true);
-        const { data, error } = await supabase.from('cf_whitelist').select('*').order('created_at', { ascending: false });
+        const { data, error } = await supabase
+            .from('cf_whitelist')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(0, 9999);
         if (error) {
             console.error('Error fetching whitelist:', error);
         } else {
@@ -376,8 +380,8 @@ export default function WhitelistManager() {
                         </div>
 
                         <div className="px-4 py-2 border-b border-gray-100 bg-white text-xs text-gray-500 flex justify-between">
-                            <span>Toplam: {whitelist.length}</span>
-                            <span>Listelenen: {filteredWhitelist.length}</span>
+                            <span>Toplam Kayıt (filtre hariç): {whitelist.length}</span>
+                            <span>Listelenen Kayıt (filtreli): {filteredWhitelist.length}</span>
                         </div>
 
                         {/* List */}

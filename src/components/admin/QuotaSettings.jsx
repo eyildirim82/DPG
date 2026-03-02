@@ -4,8 +4,8 @@ import { supabase } from '../../lib/supabase';
 
 export default function QuotaSettings() {
     const [settings, setSettings] = useState({
-        asil_returning_capacity: 400,
-        asil_new_capacity: 300,
+        asil_returning_capacity: 500,
+        asil_new_capacity: 200,
         total_capacity: 1500,
         countdown_enabled: true,
     });
