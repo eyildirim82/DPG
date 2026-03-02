@@ -29,65 +29,14 @@ export default function Dashboard() {
                     { count: submissionsTotal },
                     { count: approvedTotal },
                     { count: pendingTotal },
-                    { data: quotaData },
-                    { data: activeSubmissions },
-                    { data: whitelistFlags }
+                    { data: quotaData }
                 ] = await Promise.all([
                     supabase.from('cf_whitelist').select('*', { count: 'exact', head: true }),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).not('status', 'in', '("cancelled","rejected","expired")'),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).in('status', ['approved', 'asil', 'yedek']),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                    supabase.rpc('get_ticket_stats'),
-                    supabase
-                        .from('cf_submissions')
-                        .select('tc_no, ticket_count, ticket_type, status, soft_lock_until')
-                        .not('status', 'in', '("cancelled","rejected","expired")'),
-                    supabase.from('cf_whitelist').select('tc_no, attended_before')
+                    supabase.rpc('get_ticket_stats')
                 ]);
-
-                const normalizeTc = (value) => (value || '').toString().replace(/\D/g, '');
-
-                const whitelistMap = new Map(
-                    (whitelistFlags || []).map((row) => [normalizeTc(row.tc_no), !!row.attended_before])
-                );
-
-                const nowMs = Date.now();
-                const splitStats = (activeSubmissions || []).reduce(
-                    (acc, row) => {
-                        if (row.status === 'locked' && row.soft_lock_until) {
-                            const lockUntil = new Date(row.soft_lock_until).getTime();
-                            if (!Number.isNaN(lockUntil) && lockUntil <= nowMs) {
-                                return acc;
-                            }
-                        }
-
-                        const count = Number(row.ticket_count) > 0 ? Number(row.ticket_count) : 1;
-                        const ticketType = (row.ticket_type || '').toString().trim().toLowerCase();
-                        if (ticketType !== 'asil' && ticketType !== 'yedek') {
-                            return acc;
-                        }
-
-                        const normalizedTc = normalizeTc(row.tc_no);
-                        const isReturning = whitelistMap.get(normalizedTc) === true;
-                        const isAsil = ticketType === 'asil';
-
-                        if (isReturning) {
-                            if (isAsil) acc.asilReturningReserved += count;
-                            else acc.yedekReturningReserved += count;
-                        } else {
-                            if (isAsil) acc.asilNewReserved += count;
-                            else acc.yedekNewReserved += count;
-                        }
-
-                        return acc;
-                    },
-                    {
-                        asilReturningReserved: 0,
-                        yedekReturningReserved: 0,
-                        asilNewReserved: 0,
-                        yedekNewReserved: 0,
-                    }
-                );
 
                 setStats({
                     whitelistTotal: whitelistTotal || 0,
@@ -98,11 +47,11 @@ export default function Dashboard() {
                     quotaAsil: quotaData?.asil_capacity || 700,
                     quotaTotal: quotaData?.total_capacity || 1500,
                     asilReturningCapacity: quotaData?.asil_returning_capacity || 500,
-                    asilReturningReserved: splitStats.asilReturningReserved,
+                    asilReturningReserved: quotaData?.asil_returning_reserved || 0,
                     asilNewCapacity: quotaData?.asil_new_capacity || 200,
-                    asilNewReserved: splitStats.asilNewReserved,
-                    yedekReturningReserved: splitStats.yedekReturningReserved,
-                    yedekNewReserved: splitStats.yedekNewReserved,
+                    asilNewReserved: quotaData?.asil_new_reserved || 0,
+                    yedekReturningReserved: quotaData?.yedek_returning_reserved || 0,
+                    yedekNewReserved: quotaData?.yedek_new_reserved || 0,
                 });
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);

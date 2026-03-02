@@ -51,19 +51,8 @@ describe('Dashboard', () => {
     mockFrom.mockImplementation((table) => {
       return {
         select: (columns, options) => {
-          if (table === 'cf_whitelist' && options?.head === true) {
+          if (table === 'cf_whitelist') {
             return Promise.resolve({ count: 500 });
-          }
-
-          if (table === 'cf_whitelist' && typeof columns === 'string' && columns.includes('attended_before')) {
-            return Promise.resolve({
-              data: [
-                { tc_no: '111 111 11 111', attended_before: true },
-                { tc_no: '22222222222', attended_before: false },
-                { tc_no: '33333333333', attended_before: true },
-                { tc_no: '44444444444', attended_before: false },
-              ],
-            });
           }
 
           if (table === 'cf_submissions' && options?.head === true) {
@@ -71,21 +60,6 @@ describe('Dashboard', () => {
               not: () => Promise.resolve({ count: 200 }),
               in: () => Promise.resolve({ count: 150 }),
               eq: () => Promise.resolve({ count: 30 }),
-            };
-          }
-
-          if (table === 'cf_submissions' && typeof columns === 'string' && columns.includes('ticket_type')) {
-            return {
-              not: () =>
-                Promise.resolve({
-                  data: [
-                    { tc_no: '11111111111', ticket_count: 1, ticket_type: 'asil', status: 'pending', soft_lock_until: null },
-                    { tc_no: '22222222222', ticket_count: 1, ticket_type: 'asil', status: 'pending', soft_lock_until: null },
-                    { tc_no: '33333333333', ticket_count: 1, ticket_type: 'yedek', status: 'pending', soft_lock_until: null },
-                    { tc_no: '44444444444', ticket_count: 1, ticket_type: 'yedek', status: 'pending', soft_lock_until: null },
-                    { tc_no: '55555555555', ticket_count: 1, ticket_type: null, status: 'pending', soft_lock_until: null },
-                  ],
-                }),
             };
           }
 
@@ -103,10 +77,13 @@ describe('Dashboard', () => {
         asil_capacity: 700,
         total_capacity: 1500,
         total_reserved: 180,
-        asil_returning_capacity: 400,
+        yedek_capacity: 800,
+        asil_returning_capacity: 500,
         asil_returning_reserved: 100,
-        asil_new_capacity: 300,
-        asil_new_reserved: 80,
+        asil_new_capacity: 200,
+        asil_new_reserved: 60,
+        yedek_returning_reserved: 10,
+        yedek_new_reserved: 10,
       },
       error: null,
     });
@@ -175,7 +152,7 @@ describe('Dashboard', () => {
     });
   });
 
-  it('ticket_type boş kayıtları saymaz ve tc formatını normalize eder', async () => {
+  it('RPC verilerini doğru kartlara yansıtır', async () => {
     render(<Dashboard />);
 
     await waitFor(() => {
@@ -187,10 +164,10 @@ describe('Dashboard', () => {
     const yedekEskiCard = screen.getByText('Yedek — Eski Katılımcı').parentElement;
     const yedekYeniCard = screen.getByText('Yedek — Yeni Katılımcı').parentElement;
 
-    expect(within(asilEskiCard).getByText('1')).toBeInTheDocument();
-    expect(within(asilYeniCard).getByText('1')).toBeInTheDocument();
-    expect(within(yedekEskiCard).getByText('1')).toBeInTheDocument();
-    expect(within(yedekYeniCard).getByText('1')).toBeInTheDocument();
+    expect(within(asilEskiCard).getByText('100')).toBeInTheDocument();
+    expect(within(asilYeniCard).getByText('60')).toBeInTheDocument();
+    expect(within(yedekEskiCard).getByText('10')).toBeInTheDocument();
+    expect(within(yedekYeniCard).getByText('10')).toBeInTheDocument();
   });
 
   it('supabase.from ve rpc çağrılır', async () => {
