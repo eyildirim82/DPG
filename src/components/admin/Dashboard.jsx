@@ -67,7 +67,8 @@ export default function Dashboard() {
                             return acc;
                         }
 
-                        const isReturning = whitelistMap.get(normalizeTc(row.tc_no)) === true;
+                        const normalizedTc = normalizeTc(row.tc_no);
+                        const isReturning = whitelistMap.get(normalizedTc) === true;
                         const isAsil = ticketType === 'asil';
 
                         if (isReturning) {
