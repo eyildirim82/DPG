@@ -2,7 +2,7 @@
  * Admin Dashboard — Component Tests
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 // ─── lucide-react mock ─────────────────────────
@@ -58,7 +58,7 @@ describe('Dashboard', () => {
           if (table === 'cf_whitelist' && typeof columns === 'string' && columns.includes('attended_before')) {
             return Promise.resolve({
               data: [
-                { tc_no: '11111111111', attended_before: true },
+                { tc_no: '111 111 11 111', attended_before: true },
                 { tc_no: '22222222222', attended_before: false },
                 { tc_no: '33333333333', attended_before: true },
                 { tc_no: '44444444444', attended_before: false },
@@ -83,6 +83,7 @@ describe('Dashboard', () => {
                     { tc_no: '22222222222', ticket_count: 1, ticket_type: 'asil', status: 'pending', soft_lock_until: null },
                     { tc_no: '33333333333', ticket_count: 1, ticket_type: 'yedek', status: 'pending', soft_lock_until: null },
                     { tc_no: '44444444444', ticket_count: 1, ticket_type: 'yedek', status: 'pending', soft_lock_until: null },
+                    { tc_no: '55555555555', ticket_count: 1, ticket_type: null, status: 'pending', soft_lock_until: null },
                   ],
                 }),
             };
@@ -172,6 +173,24 @@ describe('Dashboard', () => {
     await waitFor(() => {
       expect(screen.getByText('Yedek — Yeni Katılımcı')).toBeInTheDocument();
     });
+  });
+
+  it('ticket_type boş kayıtları saymaz ve tc formatını normalize eder', async () => {
+    render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Asil — Eski Katılımcı')).toBeInTheDocument();
+    });
+
+    const asilEskiCard = screen.getByText('Asil — Eski Katılımcı').parentElement;
+    const asilYeniCard = screen.getByText('Asil — Yeni Katılımcı').parentElement;
+    const yedekEskiCard = screen.getByText('Yedek — Eski Katılımcı').parentElement;
+    const yedekYeniCard = screen.getByText('Yedek — Yeni Katılımcı').parentElement;
+
+    expect(within(asilEskiCard).getByText('1')).toBeInTheDocument();
+    expect(within(asilYeniCard).getByText('1')).toBeInTheDocument();
+    expect(within(yedekEskiCard).getByText('1')).toBeInTheDocument();
+    expect(within(yedekYeniCard).getByText('1')).toBeInTheDocument();
   });
 
   it('supabase.from ve rpc çağrılır', async () => {

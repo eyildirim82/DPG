@@ -45,8 +45,10 @@ export default function Dashboard() {
                     supabase.from('cf_whitelist').select('tc_no, attended_before')
                 ]);
 
+                const normalizeTc = (value) => (value || '').toString().replace(/\D/g, '');
+
                 const whitelistMap = new Map(
-                    (whitelistFlags || []).map((row) => [row.tc_no, !!row.attended_before])
+                    (whitelistFlags || []).map((row) => [normalizeTc(row.tc_no), !!row.attended_before])
                 );
 
                 const nowMs = Date.now();
@@ -60,8 +62,13 @@ export default function Dashboard() {
                         }
 
                         const count = Number(row.ticket_count) > 0 ? Number(row.ticket_count) : 1;
-                        const isReturning = whitelistMap.get(row.tc_no) === true;
-                        const isAsil = row.ticket_type === 'asil';
+                        const ticketType = (row.ticket_type || '').toString().trim().toLowerCase();
+                        if (ticketType !== 'asil' && ticketType !== 'yedek') {
+                            return acc;
+                        }
+
+                        const isReturning = whitelistMap.get(normalizeTc(row.tc_no)) === true;
+                        const isAsil = ticketType === 'asil';
 
                         if (isReturning) {
                             if (isAsil) acc.asilReturningReserved += count;
