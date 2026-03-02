@@ -48,20 +48,50 @@ describe('Dashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Whitelist count
-    let callCount = 0;
     mockFrom.mockImplementation((table) => {
       return {
-        select: () => {
-          callCount++;
-          if (table === 'cf_whitelist') {
+        select: (columns, options) => {
+          if (table === 'cf_whitelist' && options?.head === true) {
             return Promise.resolve({ count: 500 });
           }
-          // cf_submissions — different queries based on chain
+
+          if (table === 'cf_whitelist' && typeof columns === 'string' && columns.includes('attended_before')) {
+            return Promise.resolve({
+              data: [
+                { tc_no: '11111111111', attended_before: true },
+                { tc_no: '22222222222', attended_before: false },
+                { tc_no: '33333333333', attended_before: true },
+                { tc_no: '44444444444', attended_before: false },
+              ],
+            });
+          }
+
+          if (table === 'cf_submissions' && options?.head === true) {
+            return {
+              not: () => Promise.resolve({ count: 200 }),
+              in: () => Promise.resolve({ count: 150 }),
+              eq: () => Promise.resolve({ count: 30 }),
+            };
+          }
+
+          if (table === 'cf_submissions' && typeof columns === 'string' && columns.includes('ticket_type')) {
+            return {
+              not: () =>
+                Promise.resolve({
+                  data: [
+                    { tc_no: '11111111111', ticket_count: 1, ticket_type: 'asil', status: 'pending', soft_lock_until: null },
+                    { tc_no: '22222222222', ticket_count: 1, ticket_type: 'asil', status: 'pending', soft_lock_until: null },
+                    { tc_no: '33333333333', ticket_count: 1, ticket_type: 'yedek', status: 'pending', soft_lock_until: null },
+                    { tc_no: '44444444444', ticket_count: 1, ticket_type: 'yedek', status: 'pending', soft_lock_until: null },
+                  ],
+                }),
+            };
+          }
+
           return {
-            not: () => Promise.resolve({ count: 200 }),
-            in: () => Promise.resolve({ count: 150 }),
-            eq: () => Promise.resolve({ count: 30 }),
+            not: () => Promise.resolve({ count: 0 }),
+            in: () => Promise.resolve({ count: 0 }),
+            eq: () => Promise.resolve({ count: 0 }),
           };
         },
       };
@@ -125,6 +155,22 @@ describe('Dashboard', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Toplam Kota/)).toBeInTheDocument();
+    });
+  });
+
+  it('yedek eski katılımcı kartını gösterir', async () => {
+    render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Yedek — Eski Katılımcı')).toBeInTheDocument();
+    });
+  });
+
+  it('yedek yeni katılımcı kartını gösterir', async () => {
+    render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Yedek — Yeni Katılımcı')).toBeInTheDocument();
     });
   });
 

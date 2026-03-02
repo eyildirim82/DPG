@@ -15,6 +15,8 @@ export default function Dashboard() {
         asilReturningReserved: 0,
         asilNewCapacity: 200,
         asilNewReserved: 0,
+        yedekReturningReserved: 0,
+        yedekNewReserved: 0,
     });
     const [loading, setLoading] = useState(true);
 
@@ -27,14 +29,57 @@ export default function Dashboard() {
                     { count: submissionsTotal },
                     { count: approvedTotal },
                     { count: pendingTotal },
-                    { data: quotaData }
+                    { data: quotaData },
+                    { data: activeSubmissions },
+                    { data: whitelistFlags }
                 ] = await Promise.all([
                     supabase.from('cf_whitelist').select('*', { count: 'exact', head: true }),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).not('status', 'in', '("cancelled","rejected","expired")'),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).in('status', ['approved', 'asil', 'yedek']),
                     supabase.from('cf_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                    supabase.rpc('get_ticket_stats')
+                    supabase.rpc('get_ticket_stats'),
+                    supabase
+                        .from('cf_submissions')
+                        .select('tc_no, ticket_count, ticket_type, status, soft_lock_until')
+                        .not('status', 'in', '("cancelled","rejected","expired")'),
+                    supabase.from('cf_whitelist').select('tc_no, attended_before')
                 ]);
+
+                const whitelistMap = new Map(
+                    (whitelistFlags || []).map((row) => [row.tc_no, !!row.attended_before])
+                );
+
+                const nowMs = Date.now();
+                const splitStats = (activeSubmissions || []).reduce(
+                    (acc, row) => {
+                        if (row.status === 'locked' && row.soft_lock_until) {
+                            const lockUntil = new Date(row.soft_lock_until).getTime();
+                            if (!Number.isNaN(lockUntil) && lockUntil <= nowMs) {
+                                return acc;
+                            }
+                        }
+
+                        const count = Number(row.ticket_count) > 0 ? Number(row.ticket_count) : 1;
+                        const isReturning = whitelistMap.get(row.tc_no) === true;
+                        const isAsil = row.ticket_type === 'asil';
+
+                        if (isReturning) {
+                            if (isAsil) acc.asilReturningReserved += count;
+                            else acc.yedekReturningReserved += count;
+                        } else {
+                            if (isAsil) acc.asilNewReserved += count;
+                            else acc.yedekNewReserved += count;
+                        }
+
+                        return acc;
+                    },
+                    {
+                        asilReturningReserved: 0,
+                        yedekReturningReserved: 0,
+                        asilNewReserved: 0,
+                        yedekNewReserved: 0,
+                    }
+                );
 
                 setStats({
                     whitelistTotal: whitelistTotal || 0,
@@ -45,9 +90,11 @@ export default function Dashboard() {
                     quotaAsil: quotaData?.asil_capacity || 700,
                     quotaTotal: quotaData?.total_capacity || 1500,
                     asilReturningCapacity: quotaData?.asil_returning_capacity || 500,
-                    asilReturningReserved: quotaData?.asil_returning_reserved || 0,
+                    asilReturningReserved: splitStats.asilReturningReserved,
                     asilNewCapacity: quotaData?.asil_new_capacity || 200,
-                    asilNewReserved: quotaData?.asil_new_reserved || 0,
+                    asilNewReserved: splitStats.asilNewReserved,
+                    yedekReturningReserved: splitStats.yedekReturningReserved,
+                    yedekNewReserved: splitStats.yedekNewReserved,
                 });
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);
@@ -79,7 +126,7 @@ export default function Dashboard() {
             ) : (
                 <>
                     {/* Quota Highlights */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
                         {/* Asil - Eski Katılımcı */}
                         <div className="bg-gradient-to-br from-dpg-navy to-blue-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
                             <Ticket className="absolute right-4 bottom-4 w-24 h-24 text-white opacity-10" />
@@ -93,6 +140,16 @@ export default function Dashboard() {
                             </div>
                         </div>
 
+                        {/* Yedek - Eski Katılımcı */}
+                        <div className="bg-gradient-to-br from-amber-700 to-amber-800 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+                            <Ticket className="absolute right-4 bottom-4 w-24 h-24 text-white opacity-10" />
+                            <h3 className="text-amber-200 text-xs font-medium mb-1 uppercase tracking-wider">Yedek — Eski Katılımcı</h3>
+                            <div className="flex items-end gap-3">
+                                <span className="text-3xl font-bold">{stats.yedekReturningReserved}</span>
+                            </div>
+                            <p className="text-xs text-amber-200 mt-3">Eski katılımcı yedek toplamı</p>
+                        </div>
+
                         {/* Asil - Yeni Katılımcı */}
                         <div className="bg-gradient-to-br from-emerald-800 to-emerald-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
                             <Ticket className="absolute right-4 bottom-4 w-24 h-24 text-white opacity-10" />
@@ -104,6 +161,16 @@ export default function Dashboard() {
                             <div className="w-full bg-emerald-950/50 rounded-full h-2 mt-3">
                                 <div className="bg-emerald-400 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.asilNewReserved / stats.asilNewCapacity) * 100)}%` }}></div>
                             </div>
+                        </div>
+
+                        {/* Yedek - Yeni Katılımcı */}
+                        <div className="bg-gradient-to-br from-fuchsia-800 to-fuchsia-900 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+                            <Ticket className="absolute right-4 bottom-4 w-24 h-24 text-white opacity-10" />
+                            <h3 className="text-fuchsia-200 text-xs font-medium mb-1 uppercase tracking-wider">Yedek — Yeni Katılımcı</h3>
+                            <div className="flex items-end gap-3">
+                                <span className="text-3xl font-bold">{stats.yedekNewReserved}</span>
+                            </div>
+                            <p className="text-xs text-fuchsia-200 mt-3">Yeni katılımcı yedek toplamı</p>
                         </div>
 
                         {/* Toplam Kota */}
