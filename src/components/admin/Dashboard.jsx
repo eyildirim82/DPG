@@ -11,9 +11,9 @@ export default function Dashboard() {
         quotaAsil: 700,
         quotaTotal: 1500,
         reservedTotal: 0,
-        asilReturningCapacity: 400,
+        asilReturningCapacity: 500,
         asilReturningReserved: 0,
-        asilNewCapacity: 300,
+        asilNewCapacity: 200,
         asilNewReserved: 0,
     });
     const [loading, setLoading] = useState(true);
@@ -44,9 +44,9 @@ export default function Dashboard() {
                     reservedTotal: quotaData?.total_reserved || 0,
                     quotaAsil: quotaData?.asil_capacity || 700,
                     quotaTotal: quotaData?.total_capacity || 1500,
-                    asilReturningCapacity: quotaData?.asil_returning_capacity || 400,
+                    asilReturningCapacity: quotaData?.asil_returning_capacity || 500,
                     asilReturningReserved: quotaData?.asil_returning_reserved || 0,
-                    asilNewCapacity: quotaData?.asil_new_capacity || 300,
+                    asilNewCapacity: quotaData?.asil_new_capacity || 200,
                     asilNewReserved: quotaData?.asil_new_reserved || 0,
                 });
             } catch (error) {

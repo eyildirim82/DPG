@@ -376,8 +376,8 @@ export default function WhitelistManager() {
                         </div>
 
                         <div className="px-4 py-2 border-b border-gray-100 bg-white text-xs text-gray-500 flex justify-between">
-                            <span>Toplam: {whitelist.length}</span>
-                            <span>Listelenen: {filteredWhitelist.length}</span>
+                            <span>Toplam Kayıt (filtre hariç): {whitelist.length}</span>
+                            <span>Listelenen Kayıt (filtreli): {filteredWhitelist.length}</span>
                         </div>
 
                         {/* List */}
