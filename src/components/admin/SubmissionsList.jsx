@@ -37,17 +37,30 @@ export default function SubmissionsList() {
 
         if (formData) {
             setForm(formData);
-            const { data, error } = await supabase
-                .from('cf_submissions')
-                .select('*, cf_forms(title, schema)')
-                .eq('form_id', formData.id)
-                .eq('is_confirmed', true)
-                .order('created_at', { ascending: false });
+            const [subsResult, yedekResult] = await Promise.all([
+                supabase
+                    .from('cf_submissions')
+                    .select('*, cf_forms(title, schema)')
+                    .eq('form_id', formData.id)
+                    .eq('is_confirmed', true)
+                    .order('created_at', { ascending: false }),
+                supabase.rpc('get_yedek_sira')
+            ]);
 
-            if (error) {
-                console.error(error);
+            if (subsResult.error) {
+                console.error(subsResult.error);
             } else {
-                setSubmissions(data || []);
+                const yedekMap = {};
+                if (yedekResult.data) {
+                    yedekResult.data.forEach(row => {
+                        yedekMap[row.tc_no] = row.yedek_sira;
+                    });
+                }
+                const merged = (subsResult.data || []).map(sub => ({
+                    ...sub,
+                    yedek_sira: sub.ticket_type === 'yedek' ? (yedekMap[sub.tc_no] || null) : null
+                }));
+                setSubmissions(merged);
             }
         }
         setLoading(false);
@@ -246,6 +259,7 @@ export default function SubmissionsList() {
 
             return {
                 'Sıra No': sub.sequence_number || '',
+                'Yedek Sıra': sub.ticket_type === 'yedek' && sub.yedek_sira ? sub.yedek_sira : '',
                 'Başvuru Tarihi': new Date(sub.created_at).toLocaleString('tr-TR'),
                 'TC Kimlik': sub.tc_no || '',
                 'Ad Soyad': sub.data?.name || '',
@@ -375,9 +389,15 @@ export default function SubmissionsList() {
                                                 />
                                             </td>
                                             <td className="px-3 py-4 whitespace-nowrap text-center">
-                                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-xs font-bold text-gray-700 border border-gray-200">
-                                                    {sub.sequence_number || '-'}
-                                                </span>
+                                                {sub.ticket_type === 'yedek' && sub.yedek_sira ? (
+                                                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-xs font-bold text-orange-700 border border-orange-300" title={`Yedek Sıra: ${sub.yedek_sira}`}>
+                                                        Y{sub.yedek_sira}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-xs font-bold text-gray-700 border border-gray-200">
+                                                        {sub.sequence_number || '-'}
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-4 py-4 whitespace-nowrap">
                                                 <div className="flex flex-col">
