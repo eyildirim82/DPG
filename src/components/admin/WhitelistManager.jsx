@@ -29,17 +29,31 @@ export default function WhitelistManager() {
 
     const fetchWhitelist = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('cf_whitelist')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .range(0, 9999);
-        if (error) {
+        let allData = [];
+        let fromIndex = 0;
+        const pageSize = 1000;
+        
+        try {
+            while (true) {
+                const { data, error } = await supabase
+                    .from('cf_whitelist')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .range(fromIndex, fromIndex + pageSize - 1);
+                
+                if (error) throw error;
+                if (!data || data.length === 0) break;
+                
+                allData = [...allData, ...data];
+                if (data.length < pageSize) break;
+                fromIndex += pageSize;
+            }
+            setWhitelist(allData);
+        } catch (error) {
             console.error('Error fetching whitelist:', error);
-        } else {
-            setWhitelist(data || []);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const addPerson = async (e) => {
