@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { theme } from '../styles/theme';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
@@ -8,12 +8,28 @@ import GoldSponsor from '../components/Goldsponsor';
 import ArtistsList from '../components/ArtistsList';
 import SponsorsList from '../components/SponsorsList';
 import ApplicationForm from '../components/ApplicationForm';
+import CheckinForm from '../components/CheckinForm';
 import DocumentLinks from '../components/DocumentLinks';
 import Modal from '../components/Modal';
+import { fetchPublicRuntimeFlags, DEFAULT_RUNTIME_FLAGS } from '../lib/runtimeFlags';
 
 export default function PublicPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
+    const [runtimeFlags, setRuntimeFlags] = useState(DEFAULT_RUNTIME_FLAGS);
+    const forceCheckinUi = import.meta.env.VITE_E2E_FORCE_CHECKIN === 'true';
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadFlags = async () => {
+            const flags = await fetchPublicRuntimeFlags();
+            if (isMounted) setRuntimeFlags(flags);
+        };
+
+        loadFlags();
+        return () => { isMounted = false; };
+    }, []);
 
     const scrollTo = useCallback((id) => {
         const el = document.getElementById(id);
@@ -43,7 +59,14 @@ export default function PublicPage() {
                 <GoldSponsor />
                 <ArtistsList />
                 <SponsorsList />
-                <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
+                {forceCheckinUi || (runtimeFlags.applications_closed && runtimeFlags.checkin_enabled) ? (
+                    <CheckinForm
+                        checkinActionsEnabled={forceCheckinUi ? true : runtimeFlags.checkin_actions_enabled}
+                        otpBypassEnabled={forceCheckinUi ? true : runtimeFlags.otp_bypass_enabled}
+                    />
+                ) : (
+                    <ApplicationForm onSubmitSuccess={(isUpd) => { setIsUpdate(isUpd); setModalOpen(true); }} />
+                )}
                 <DocumentLinks />
                 <Footer />
             </div>

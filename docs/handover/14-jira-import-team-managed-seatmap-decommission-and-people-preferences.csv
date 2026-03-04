@@ -1,0 +1,28 @@
+Issue Id,Issue Type,Summary,Description,Priority,Labels,Story point estimate,Parent Id
+PREF-EPIC-01,Epic,Veri Modeli ve RPC Geçişi,"Seatmap bağımlılığını bozmadan kişi tercih listesi veri modelini eklemek ve RPC geçişini sağlamak.",Highest,"checkin,people-preference,migration",,
+PREF-EPIC-02,Epic,Frontend Akış Geçişi,"Check-in ekranını masa seçimi yerine kişi tercih listesi akışına çevirmek.",Highest,"checkin,frontend,people-preference",,
+PREF-EPIC-03,Epic,Decommission ve Operasyon,"Seatmap sistemini kontrollü kapatmak, testleri ve runbookları güncellemek.",High,"decommission,rollout,e2e",,
+PREF-101,Story,Kişi tercih veri modeli ekle,"Yeni preferred_people veri yapısı eklensin, seatmap ile çakışmadan additive migration gelsin.",Highest,"migration,supabase,people-preference",8,PREF-EPIC-01
+PREF-101-T1,Sub-task,Migration ve indexleri ekle,"Yeni alan veya tabloyu ve gerekli indexleri oluştur.",Highest,"migration",,PREF-101
+PREF-101-T2,Sub-task,Default/backfill kuralı tanımla,"Mevcut kayıtlar için güvenli varsayılan atama yap.",High,"migration,data",,PREF-101
+PREF-102,Story,Checkin RPC kişi tercih payload desteği,"checkin_confirm_and_continue kişi tercih listesi ile çalışsın ve backward compatible olsun.",Highest,"supabase,rpc,people-preference",8,PREF-EPIC-01
+PREF-102-T1,Sub-task,RPC payload validasyonunu ekle,"Yeni payload için allowlist ve doğrulama kuralları.",Highest,"rpc,validation",,PREF-102
+PREF-102-T2,Sub-task,Integration testleri güncelle,"Yeni payload ile başarılı/başarısız senaryoları test et.",High,"integration,test",,PREF-102
+PREF-103,Story,Geçiş feature flag ekle,"Yeni kişi tercihi akışını flag ile açıp kapatılabilir hale getir.",High,"feature-flag,rollout",5,PREF-EPIC-01
+PREF-103-T1,Sub-task,Admin toggle ekle,"Admin panelde geçiş flagini yönetilebilir yap.",High,"admin,frontend",,PREF-103
+PREF-104,Story,Seatmap bağımlılık envanteri,"Kaldırılacak seatmap dosya/fonksiyon envanterini çıkar ve deprecation planı yaz.",Medium,"deprecation,documentation",3,PREF-EPIC-01
+PREF-201,Story,Check-in UI kişi tercih listesine geçiş,"CheckinForm içinde masa picker yerine kişi arama/seçim/listeden çıkar akışını uygula.",Highest,"frontend,checkin,people-preference",8,PREF-EPIC-02
+PREF-201-T1,Sub-task,Yeni seçim bileşeni geliştir,"Kişi ekleme/silme UX bileşeni oluştur.",Highest,"frontend,ui",,PREF-201
+PREF-201-T2,Sub-task,CheckinForm entegrasyonunu tamamla,"Yeni seçim verisini check-in submit akışına bağla.",Highest,"frontend,checkin",,PREF-201
+PREF-202,Story,Adminde seatmap kapasite alanını pasifleştir,"table_capacity alanını gizle veya deprecated olarak işaretle.",High,"admin,deprecation",5,PREF-EPIC-02
+PREF-203,Story,E2E ve integration testlerini yeni akışa taşı,"Seatmap senaryolarını kaldırıp kişi tercih senaryolarını devreye al.",Highest,"e2e,integration,test",8,PREF-EPIC-02
+PREF-203-T1,Sub-task,Playwright check-in testini güncelle,"Kişi tercih listesi happy/negative testlerini ekle.",Highest,"e2e",,PREF-203
+PREF-203-T2,Sub-task,Eski seatmap testlerini arşivle veya kaldır,"Gereksiz testleri temizle.",Medium,"test,cleanup",,PREF-203
+PREF-204,Story,UAT rehberini güncelle,"Lokal ve test sunucusu test adımlarında seatmap yerine kişi tercih akışını yaz.",High,"uat,documentation",3,PREF-EPIC-02
+PREF-301,Story,Seatmap frontend kodunu kaldır,"TableLayoutPicker/hotspot kullanımını koddan temizle.",Highest,"frontend,decommission",5,PREF-EPIC-03
+PREF-301-T1,Sub-task,Kullanılmayan dosya ve importları temizle,"Seatmap ile ilgili bileşen ve data dosyalarını kaldır.",Highest,"cleanup,frontend",,PREF-301
+PREF-302,Story,Seatmap backend artefaktlarını kaldırma migrationı,"Table RPC ve table_capacity kullanımını kontrollü olarak kaldır.",Highest,"supabase,migration,decommission",8,PREF-EPIC-03
+PREF-302-T1,Sub-task,Decommission migrationını yaz,"Eski RPC/kolonları no-op veya drop stratejisiyle kaldır.",Highest,"migration,supabase",,PREF-302
+PREF-302-T2,Sub-task,Rollback migrationı hazırla,"Geri dönüş için net rollback script ekle.",High,"migration,rollback",,PREF-302
+PREF-303,Story,Post-cutover gözlem raporu,"Yeni akışın ilk 24 saat stabilitesini log/metrik ile değerlendir.",High,"monitoring,rollout",3,PREF-EPIC-03
+PREF-304,Story,Dokümantasyon son temizliği,"Handover ve README'de seatmap referanslarını güncelle.",Medium,"documentation,cleanup",3,PREF-EPIC-03

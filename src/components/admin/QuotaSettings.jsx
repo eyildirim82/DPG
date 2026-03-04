@@ -8,6 +8,11 @@ export default function QuotaSettings() {
         asil_new_capacity: 200,
         total_capacity: 1500,
         countdown_enabled: true,
+        applications_closed: false,
+        checkin_enabled: false,
+        otp_enabled: false,
+        otp_bypass_enabled: false,
+        checkin_actions_enabled: false,
     });
     const [original, setOriginal] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -31,6 +36,11 @@ export default function QuotaSettings() {
                     asil_new_capacity: data.asil_new_capacity,
                     total_capacity: data.total_capacity,
                     countdown_enabled: data.countdown_enabled ?? true,
+                    applications_closed: data.applications_closed ?? false,
+                    checkin_enabled: data.checkin_enabled ?? false,
+                    otp_enabled: data.otp_enabled ?? false,
+                    otp_bypass_enabled: data.otp_bypass_enabled ?? false,
+                    checkin_actions_enabled: data.checkin_actions_enabled ?? false,
                 };
                 setSettings(s);
                 setOriginal(s);
@@ -57,15 +67,22 @@ export default function QuotaSettings() {
         }
 
         try {
-            const { error } = await supabase
+            const updatePayload = {
+                asil_returning_capacity: settings.asil_returning_capacity,
+                asil_new_capacity: settings.asil_new_capacity,
+                total_capacity: settings.total_capacity,
+                countdown_enabled: settings.countdown_enabled,
+                applications_closed: settings.applications_closed,
+                checkin_enabled: settings.checkin_enabled,
+                otp_enabled: settings.otp_enabled,
+                otp_bypass_enabled: settings.otp_bypass_enabled,
+                checkin_actions_enabled: settings.checkin_actions_enabled,
+                updated_at: new Date().toISOString(),
+            };
+
+            let { error } = await supabase
                 .from('cf_quota_settings')
-                .update({
-                    asil_returning_capacity: settings.asil_returning_capacity,
-                    asil_new_capacity: settings.asil_new_capacity,
-                    total_capacity: settings.total_capacity,
-                    countdown_enabled: settings.countdown_enabled,
-                    updated_at: new Date().toISOString(),
-                })
+                .update(updatePayload)
                 .eq('id', settings.id);
 
             if (error) throw error;
@@ -74,7 +91,8 @@ export default function QuotaSettings() {
             setMessage({ type: 'success', text: 'Kota ayarları başarıyla güncellendi.' });
         } catch (err) {
             console.error('Error saving quota settings:', err);
-            setMessage({ type: 'error', text: 'Kota ayarları kaydedilemedi.' });
+            const baseText = err?.message ? `Kota ayarları kaydedilemedi: ${err.message}` : 'Kota ayarları kaydedilemedi.';
+            setMessage({ type: 'error', text: baseText });
         } finally {
             setSaving(false);
         }
@@ -84,7 +102,12 @@ export default function QuotaSettings() {
         settings.asil_returning_capacity !== original.asil_returning_capacity ||
         settings.asil_new_capacity !== original.asil_new_capacity ||
         settings.total_capacity !== original.total_capacity ||
-        settings.countdown_enabled !== original.countdown_enabled
+        settings.countdown_enabled !== original.countdown_enabled ||
+        settings.applications_closed !== original.applications_closed ||
+        settings.checkin_enabled !== original.checkin_enabled ||
+        settings.otp_enabled !== original.otp_enabled ||
+        settings.otp_bypass_enabled !== original.otp_bypass_enabled ||
+        settings.checkin_actions_enabled !== original.checkin_actions_enabled
     );
 
     const asilTotal = settings.asil_returning_capacity + settings.asil_new_capacity;
@@ -136,6 +159,23 @@ export default function QuotaSettings() {
                     <span className="text-blue-100 text-sm">Başvuru Geri Sayımı</span>
                     <span className={`text-sm font-semibold ${settings.countdown_enabled ? 'text-green-300' : 'text-red-300'}`}>
                         {settings.countdown_enabled ? 'Açık' : 'Kapalı'}
+                    </span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                    <span className={`text-xs px-2 py-1 rounded-full border ${settings.applications_closed ? 'border-red-300 text-red-200' : 'border-green-300 text-green-200'}`}>
+                        Başvurular {settings.applications_closed ? 'Kapalı' : 'Açık'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${settings.checkin_enabled ? 'border-green-300 text-green-200' : 'border-slate-300 text-slate-200'}`}>
+                        Check-in {settings.checkin_enabled ? 'Açık' : 'Kapalı'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${settings.otp_enabled ? 'border-green-300 text-green-200' : 'border-slate-300 text-slate-200'}`}>
+                        OTP {settings.otp_enabled ? 'Açık' : 'Kapalı'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${settings.otp_bypass_enabled ? 'border-yellow-300 text-yellow-200' : 'border-slate-300 text-slate-200'}`}>
+                        OTP Bypass {settings.otp_bypass_enabled ? 'Açık' : 'Kapalı'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${settings.checkin_actions_enabled ? 'border-green-300 text-green-200' : 'border-slate-300 text-slate-200'}`}>
+                        Check-in Aksiyonları {settings.checkin_actions_enabled ? 'Açık' : 'Kapalı'}
                     </span>
                 </div>
             </div>
@@ -196,6 +236,83 @@ export default function QuotaSettings() {
                             <span className="block text-sm font-semibold text-gray-700">Başvuru geri sayımını göster</span>
                             <span className="block text-xs text-gray-500 mt-1">
                                 Kapalı olduğunda başvuru formu geri sayımı beklemeden doğrudan açılır.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.applications_closed}
+                            onChange={(e) => setSettings({ ...settings, applications_closed: e.target.checked })}
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-gray-700">Başvuruları kapat</span>
+                            <span className="block text-xs text-gray-500 mt-1">
+                                Açık olduğunda başvuru dönemi kapalı kabul edilir ve check-in ekranına geçiş için hazır olur.
+                            </span>
+                        </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.checkin_enabled}
+                            onChange={(e) => setSettings({ ...settings, checkin_enabled: e.target.checked })}
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-gray-700">Check-in ekranını etkinleştir</span>
+                            <span className="block text-xs text-gray-500 mt-1">
+                                Public tarafta check-in akışının görünür olmasını kontrol eder.
+                            </span>
+                        </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.otp_enabled}
+                            onChange={(e) => setSettings({ ...settings, otp_enabled: e.target.checked })}
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-gray-700">E-posta OTP doğrulamayı etkinleştir</span>
+                            <span className="block text-xs text-gray-500 mt-1">
+                                Check-in içinde OTP gönderim/doğrulama adımlarını açar.
+                            </span>
+                        </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.otp_bypass_enabled}
+                            onChange={(e) => setSettings({ ...settings, otp_bypass_enabled: e.target.checked })}
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-gray-700">OTP bypass (yalnız test için)</span>
+                            <span className="block text-xs text-gray-500 mt-1">
+                                Açıkken TC ile OTP kodu girmeden check-in akışına geçilebilir. Canlıda kapalı tutulmalıdır.
+                            </span>
+                        </span>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={settings.checkin_actions_enabled}
+                            onChange={(e) => setSettings({ ...settings, checkin_actions_enabled: e.target.checked })}
+                            className="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-gray-700">Check-in aksiyonlarını etkinleştir</span>
+                            <span className="block text-xs text-gray-500 mt-1">
+                                Doğrulama sonrası `Check-in / Düzenle / İptal` aksiyonlarını açar.
                             </span>
                         </span>
                     </label>

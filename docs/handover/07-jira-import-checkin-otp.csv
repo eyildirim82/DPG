@@ -1,0 +1,70 @@
+Issue Id,Issue Type,Summary,Description,Priority,Labels,Story Points,Epic Name,Epic Link,Parent Id
+CHK-EPIC-01,Epic,Runtime Flags ve Güvenli Route Geçişi,"Başvuru açık/kapalı durumuna göre public ekranı güvenli yöneten altyapı.",Highest,"checkin,otp,rollout",,Runtime Flags ve Güvenli Route Geçişi,,
+CHK-EPIC-02,Epic,OTP Backend (Supabase RPC + RLS),"TC bazlı e-posta OTP üretme/doğrulama ve kısa ömürlü session yönetimi.",Highest,"checkin,otp,supabase,migration",,OTP Backend (Supabase RPC + RLS),,
+CHK-EPIC-03,Epic,OTP E-posta Gönderimi (Edge Function),"OTP kodunun güvenli ve izlenebilir biçimde e-posta ile gönderimi.",High,"checkin,otp,supabase",,OTP E-posta Gönderimi (Edge Function),,
+CHK-EPIC-04,Epic,Check-in Frontend Akışı,"TC giriş, OTP doğrulama, özet ve 3 aksiyon ekranları.",Highest,"checkin,otp",,Check-in Frontend Akışı,,
+CHK-EPIC-05,Epic,Test Cutover ve Rollback Operasyonu,"Regresyonu engelleyen test seti ve canlı geçiş runbook'u.",Highest,"checkin,rollout,e2e",,Test Cutover ve Rollback Operasyonu,,
+
+CHK-101,Story,Runtime flag modeli oluştur,"applications_closed, checkin_enabled, otp_enabled, checkin_actions_enabled DB'de tanımlı ve varsayılan false.",Highest,"checkin,otp,migration",5,,CHK-EPIC-01,
+CHK-101-T1,Sub-task,Flag migration dosyasını oluştur,"Flag kolonları veya runtime flags tablosunu ekle.",Highest,"migration,checkin",,, ,CHK-101
+CHK-101-T2,Sub-task,Default seed değerlerini tanımla,"Tüm yeni flagler false ile başlasın.",High,"migration",,, ,CHK-101
+
+CHK-102,Story,OTP request verify veri modeli ve RPC iskeleti,"cf_checkin_otp_requests ve cf_checkin_sessions tabloları ile request/verify RPC temel akışı.",Highest,"checkin,otp,supabase,migration",8,,CHK-EPIC-02,
+CHK-102-T1,Sub-task,OTP tabloları migrationını yaz,"OTP request ve session tablolarını indexlerle ekle.",Highest,"migration,otp",,, ,CHK-102
+CHK-102-T2,Sub-task,Request OTP RPC iskeletini ekle,"request_checkin_otp imzası ve temel dönüş sözleşmesi.",Highest,"supabase,otp",,, ,CHK-102
+CHK-102-T3,Sub-task,Verify OTP RPC iskeletini ekle,"verify_checkin_otp imzası ve checkin_token üretimi.",Highest,"supabase,otp",,, ,CHK-102
+
+CHK-103,Story,OTP güvenlik kuralları uygula,"TTL, max attempt, cooldown ve tek kullanımlık OTP davranışı.",Highest,"otp,security",5,,CHK-EPIC-02,
+CHK-103-T1,Sub-task,OTP TTL kontrolü ekle,"Süresi geçen OTP doğrulanmasın.",Highest,"otp,security",,, ,CHK-103
+CHK-103-T2,Sub-task,Attempt limit kontrolü ekle,"Hatalı deneme sınırı sonrası OTP pasifleşsin.",Highest,"otp,security",,, ,CHK-103
+CHK-103-T3,Sub-task,Cooldown kuralı ekle,"Kısa sürede tekrar OTP isteme engeli.",High,"otp,security",,, ,CHK-103
+
+CHK-104,Story,RLS ve direct erişim kısıtları,"OTP tabloları sadece SECURITY DEFINER RPC ile erişilsin.",Highest,"supabase,security,rls",5,,CHK-EPIC-02,
+CHK-104-T1,Sub-task,OTP tabloları RLS policylerini ekle,"Direct client erişimi reddedilsin.",Highest,"rls,security",,, ,CHK-104
+CHK-104-T2,Sub-task,Security integration testleri yaz,"Policy ve RPC access testlerini ekle.",High,"integration,security",,, ,CHK-104
+
+CHK-105,Story,OTP e-posta template ve log altyapısı,"otp_checkin şablonu ve gönderim log görünürlüğü.",High,"otp,email",3,,CHK-EPIC-03,
+CHK-105-T1,Sub-task,OTP email template ekle,"Template subject/body ve değişkenleri tanımla.",High,"email",,, ,CHK-105
+CHK-105-T2,Sub-task,Gönderim log mappingini tamamla,"Başarılı/başarısız gönderim logları izlenebilir olsun.",High,"email,logging",,, ,CHK-105
+
+CHK-201,Story,Public route switch uygula,"applications_closed ve checkin_enabled kombinasyonuna göre ekran değişsin.",Highest,"checkin,frontend",8,,CHK-EPIC-04,
+CHK-201-T1,Sub-task,Route gate komponentini yaz,"Public page içinde başvuru/checkin koşullu render.",Highest,"frontend",,, ,CHK-201
+CHK-201-T2,Sub-task,Flag fetch ve fallback davranışını ekle,"Flag uyumsuzluğunda güvenli bilgilendirme ekranı.",High,"frontend",,, ,CHK-201
+
+CHK-202,Story,Check-in adım 1-2 geliştir,"TC giriş, OTP isteme, OTP doğrulama, cooldown ve süre gösterimi.",Highest,"checkin,frontend,otp",8,,CHK-EPIC-04,
+CHK-202-T1,Sub-task,TC giriş ve OTP isteme ekranını yap,"request_checkin_otp entegrasyonu dahil.",Highest,"frontend,otp",,, ,CHK-202
+CHK-202-T2,Sub-task,OTP doğrulama ekranını yap,"verify_checkin_otp entegrasyonu ve hata mapleme.",Highest,"frontend,otp",,, ,CHK-202
+
+CHK-203,Story,Check-in adım 3 aksiyon ekranı,"Başvuru özeti ve 3 aksiyon: Check-in+Masa, Düzenle, İptal.",Highest,"checkin,frontend",8,,CHK-EPIC-04,
+CHK-203-T1,Sub-task,Özet ekranı bileşenini ekle,"Bilet tipi ve başvuru bilgilerini göster.",Highest,"frontend",,, ,CHK-203
+CHK-203-T2,Sub-task,Check-in ve masa seçimi aksiyonunu bağla,"checkin_confirm_and_continue RPC çağrısı.",Highest,"frontend,supabase",,, ,CHK-203
+CHK-203-T3,Sub-task,Düzenle ve iptal aksiyonlarını bağla,"checkin_update_application ve checkin_cancel_application.",High,"frontend,supabase",,, ,CHK-203
+
+CHK-204,Story,Session token güvenli state yönetimi,"Token kısa ömürlü bellek state'te tutulsun, expire olunca OTP adımına dönsün.",High,"checkin,security,frontend",5,,CHK-EPIC-04,
+CHK-204-T1,Sub-task,Token memory-state akışını yaz,"LocalStorage kullanılmadan in-memory yönetim.",High,"frontend,security",,, ,CHK-204
+CHK-204-T2,Sub-task,Expire ve yeniden doğrulama handlerını ekle,"Token süre aşımında kullanıcı yeniden OTP ekranına alınsın.",High,"frontend,security",,, ,CHK-204
+
+CHK-205,Story,E2E senaryoları check-in,"Happy path, invalid OTP, expired OTP, düzenle, iptal, continue ve regresyon smoke.",Highest,"e2e,checkin,otp",5,,CHK-EPIC-05,
+CHK-205-T1,Sub-task,Check-in happy path e2e yaz,"TC->OTP->Aksiyon tamamla akışı.",Highest,"e2e",,, ,CHK-205
+CHK-205-T2,Sub-task,Hata senaryosu e2e yaz,"Yanlış OTP ve süre dolumu senaryoları.",Highest,"e2e",,, ,CHK-205
+CHK-205-T3,Sub-task,Mevcut başvuru akışı smoke regresyonu ekle,"applications_closed false iken mevcut akış sağlam.",High,"e2e,regression",,, ,CHK-205
+
+CHK-301,Story,Internal pilot guard,"OTP/checkin sadece pilot whitelist için açılabilsin.",Highest,"rollout,checkin",5,,CHK-EPIC-05,
+CHK-301-T1,Sub-task,RPC pilot allowlist guard ekle,"Internal kullanıcılar dışındakileri blokla.",Highest,"supabase,rollout",,, ,CHK-301
+CHK-301-T2,Sub-task,Pilot test checklistini hazırla,"Pilot senaryoları ve kabul adımları.",High,"qa,rollout",,, ,CHK-301
+
+CHK-302,Story,Cutover runbook ve görev paylaşımı,"T-1/T-0/T+1h/T+24h operasyon adımları ve sorumlular.",Highest,"rollout,ops",5,,CHK-EPIC-05,
+CHK-302-T1,Sub-task,Canlıya geçiş runbook dokümanını tamamla,"Açma/kapatma sırası ve karar ağacı.",Highest,"ops,documentation",,, ,CHK-302
+CHK-302-T2,Sub-task,On-call iletişim planını yaz,"FE/BE/Ops sorumluları ve escalation hattı.",High,"ops",,, ,CHK-302
+
+CHK-303,Story,Rollback ve kill-switch testi,"applications_closed, otp_enabled, checkin_enabled flagleri ile 5 dk altı geri dönüş.",Highest,"rollback,rollout",5,,CHK-EPIC-05,
+CHK-303-T1,Sub-task,Rollback dry-run uygula,"Staging/prod-benzeri ortamda geri alma tatbikatı.",Highest,"rollback,qa",,, ,CHK-303
+CHK-303-T2,Sub-task,Geri alma süre ölçümü raporu çıkar,"SLA: 5 dakikanın altında.",High,"rollback,report",,, ,CHK-303
+
+CHK-304,Story,Canlı metrik ve alarm seti,"OTP send fail rate, verify fail spike, completion rate izleme.",High,"monitoring,rollout",5,,CHK-EPIC-05,
+CHK-304-T1,Sub-task,OTP gönderim alarmı tanımla,"Edge function hata oranına eşik ekle.",High,"monitoring",,, ,CHK-304
+CHK-304-T2,Sub-task,Check-in completion paneli oluştur,"Tamamlanma oranı dashboard metriği.",High,"monitoring",,, ,CHK-304
+
+CHK-305,Story,Post-release değerlendirme,"İlk 24 saat olay raporu ve iyileştirme ticketları.",Medium,"rollout,postmortem",3,,CHK-EPIC-05,
+CHK-305-T1,Sub-task,24 saat olay raporunu yaz,"Özet olaylar, etki, aksiyonlar.",Medium,"postmortem",,, ,CHK-305
+CHK-305-T2,Sub-task,İyileştirme backlog'unu aç,"Takip ticketlarını oluştur ve önceliklendir.",Medium,"backlog",,, ,CHK-305

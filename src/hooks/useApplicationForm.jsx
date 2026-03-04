@@ -31,28 +31,10 @@ export default function useApplicationForm({ onSubmitSuccess }) {
   const [attendedBefore, setAttendedBefore] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [ticketType, setTicketType] = useState(null);
-  const [selectedCluster, setSelectedCluster] = useState('Otomatik');
-  const [submittingSeating, setSubmittingSeating] = useState(false);
   const [lockExpiresAt, setLockExpiresAt] = useState(null);
   const [remainingSeconds, setRemainingSeconds] = useState(null);
   const [timeLeft, setTimeLeft] = useState('');
-  const [tableStats, setTableStats] = useState([]);
   const firstErrorRef = useRef(null);
-
-  /* ───── Fetch table stats (step 3) ───── */
-  useEffect(() => {
-    if (step === 3) {
-      const fetchTableStats = async () => {
-        try {
-          const { data, error } = await supabase.rpc('get_table_stats');
-          if (!error && data) setTableStats(data);
-        } catch (err) {
-          console.error('Error fetching table stats:', err);
-        }
-      };
-      fetchTableStats();
-    }
-  }, [step]);
 
   /* ───── Fetch quota on mount ───── */
   useEffect(() => {
@@ -204,31 +186,6 @@ export default function useApplicationForm({ onSubmitSuccess }) {
     }
   };
 
-  /* ───── Seating preference (Step 3) ───── */
-  const handleSeatingSubmit = async (e) => {
-    e.preventDefault();
-    setSubmittingSeating(true);
-    setApiError(null);
-    try {
-      const tc = watch('tcNo');
-      const prefsStr = JSON.stringify({ cluster: selectedCluster });
-      const { data, error } = await supabase.rpc('update_seating_preference', {
-        p_tc_no: tc,
-        p_preferences: prefsStr,
-      });
-      if (error || !data.success) {
-        setApiError(error?.message || data?.message || 'Kaydedilemedi.');
-      } else {
-        alert('Tercihleriniz başarıyla kaydedildi!');
-      }
-    } catch (err) {
-      console.error(err);
-      setApiError('Bir hata oluştu.');
-    } finally {
-      setSubmittingSeating(false);
-    }
-  };
-
   /* ───── Form submission (Step 2) ───── */
   const onValid = async (formData) => {
     setApiError(null);
@@ -348,19 +305,14 @@ export default function useApplicationForm({ onSubmitSuccess }) {
     attendedBefore,
     submissionStatus,
     ticketType,
-    selectedCluster,
-    setSelectedCluster,
-    submittingSeating,
     remainingSeconds,
     timeLeft,
-    tableStats,
     firstErrorRef,
     // Form
     form,
     bringGuest,
     // Handlers
     handleTcSubmit,
-    handleSeatingSubmit,
     onValid,
     onInvalid,
     resetToStep1,

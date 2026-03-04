@@ -38,16 +38,13 @@ describe('useApplicationForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    // Default: get_ticket_stats & get_table_stats happy path
+    // Default: get_ticket_stats happy path
     mockRpc.mockImplementation((name) => {
       if (name === 'get_ticket_stats') {
         return Promise.resolve({
           data: { total_capacity: 1500, total_reserved: 100, asil_capacity: 700 },
           error: null,
         });
-      }
-      if (name === 'get_table_stats') {
-        return Promise.resolve({ data: [], error: null });
       }
       return Promise.resolve({ data: null, error: null });
     });
@@ -89,11 +86,6 @@ describe('useApplicationForm', () => {
     it('attendedBefore false ile başlar', () => {
       const { result } = renderHook(() => useApplicationForm({ onSubmitSuccess }));
       expect(result.current.attendedBefore).toBe(false);
-    });
-
-    it('selectedCluster "Otomatik" ile başlar', () => {
-      const { result } = renderHook(() => useApplicationForm({ onSubmitSuccess }));
-      expect(result.current.selectedCluster).toBe('Otomatik');
     });
 
     it('mount sırasında get_ticket_stats çağrılır', async () => {
@@ -487,18 +479,14 @@ describe('useApplicationForm', () => {
       expect(result.current).toHaveProperty('quotaStats');
       expect(result.current).toHaveProperty('attendedBefore');
       expect(result.current).toHaveProperty('ticketType');
-      expect(result.current).toHaveProperty('selectedCluster');
       expect(result.current).toHaveProperty('timeLeft');
-      expect(result.current).toHaveProperty('tableStats');
 
       // Handlers
       expect(typeof result.current.handleTcSubmit).toBe('function');
-      expect(typeof result.current.handleSeatingSubmit).toBe('function');
       expect(typeof result.current.onValid).toBe('function');
       expect(typeof result.current.onInvalid).toBe('function');
       expect(typeof result.current.resetToStep1).toBe('function');
       expect(typeof result.current.setTcInput).toBe('function');
-      expect(typeof result.current.setSelectedCluster).toBe('function');
 
       // Form
       expect(result.current.form).toBeDefined();

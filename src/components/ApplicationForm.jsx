@@ -8,9 +8,8 @@ import { theme } from '../styles/theme';
 import { FLEET_OPTIONS, AGE_GROUP_OPTIONS, AIRLINE_OPTIONS, formatPhoneNumber } from '../lib/validation';
 import useApplicationForm from '../hooks/useApplicationForm.jsx';
 import TCVerifyStep from './form/TCVerifyStep';
-import SeatingStep from './form/SeatingStep';
 import { OPEN_DATE } from './CountdownTimer';
-import { supabase } from '../lib/supabase';
+import { fetchPublicRuntimeFlags } from '../lib/runtimeFlags';
 
 const envCountdownEnabled = import.meta.env.VITE_ENABLE_APPLICATION_COUNTDOWN !== 'false';
 
@@ -24,14 +23,10 @@ export default function ApplicationForm({ onSubmitSuccess }) {
     let isMounted = true;
 
     const fetchCountdownSetting = async () => {
-      if (!supabase) return;
-
       try {
-        const { data, error } = await supabase.rpc('get_application_countdown_enabled');
-        if (error) throw error;
-
-        if (isMounted && typeof data === 'boolean') {
-          setCountdownEnabled(data);
+        const flags = await fetchPublicRuntimeFlags();
+        if (isMounted && typeof flags.countdown_enabled === 'boolean') {
+          setCountdownEnabled(flags.countdown_enabled);
         }
       } catch (err) {
         console.error('Countdown setting could not be loaded, env fallback will be used:', err);
@@ -95,17 +90,12 @@ export default function ApplicationForm({ onSubmitSuccess }) {
     attendedBefore,
     submissionStatus,
     ticketType,
-    selectedCluster,
-    setSelectedCluster,
-    submittingSeating,
     remainingSeconds,
     timeLeft,
-    tableStats,
     firstErrorRef,
     form,
     bringGuest,
     handleTcSubmit,
-    handleSeatingSubmit,
     onValid,
     onInvalid,
     resetToStep1,
@@ -235,15 +225,6 @@ export default function ApplicationForm({ onSubmitSuccess }) {
           isReturningFull={isReturningFull}
           isNewFull={isNewFull}
         />
-      ) : step === 3 ? (
-        /* ═══════════════ STEP 3 — Seating Selection ═══════════════ */
-        <SeatingStep
-          selectedCluster={selectedCluster}
-          setSelectedCluster={setSelectedCluster}
-          submittingSeating={submittingSeating}
-          tableStats={tableStats}
-          onSubmit={handleSeatingSubmit}
-        />
       ) : (
         /* ═══════════════ STEP 2 — Application Form ═══════════════ */
         <form onSubmit={handleSubmit(onValid, onInvalid)} noValidate>
@@ -286,16 +267,9 @@ export default function ApplicationForm({ onSubmitSuccess }) {
               <div>
                 <strong className="block text-green-400 text-lg md:text-xl mb-1">Başvurunuz Onaylanmıştır!</strong>
                 <span className="text-green-200 text-base md:text-lg font-body">
-                  Masa düzeni tercihinizi yapmak için aşağıdaki butonu kullanabilirsiniz. Bilgilerinizi de aşağıdan güncelleyebilirsiniz.
+                  Bilgilerinizi aşağıdaki formdan güncelleyebilirsiniz.
                 </span>
               </div>
-              <Button
-                type="button"
-                onClick={() => setStep(3)}
-                className="whitespace-nowrap min-h-[44px] bg-green-600 hover:bg-green-500 text-white"
-              >
-                Masa Seçimi
-              </Button>
             </div>
           ) : submissionStatus ? (
             <div className="mb-6 py-4 px-5 rounded border border-blue-500/50 bg-blue-500/10 text-blue-200 text-base md:text-lg font-body">

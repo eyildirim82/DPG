@@ -1,11 +1,10 @@
 /**
- * TCVerifyStep & SeatingStep — Component Tests
+ * TCVerifyStep — Component Tests
  */
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import TCVerifyStep from './TCVerifyStep';
-import SeatingStep from './SeatingStep';
 
 // ──────────────────────────────────────────────
 // TCVerifyStep
@@ -73,74 +72,5 @@ describe('TCVerifyStep', () => {
     render(<TCVerifyStep {...defaultProps} tcInput="10000000146" />);
     const input = screen.getByLabelText('TC Kimlik No');
     expect(input).toHaveValue('10000000146');
-  });
-});
-
-// ──────────────────────────────────────────────
-// SeatingStep
-// ──────────────────────────────────────────────
-describe('SeatingStep', () => {
-  const defaultProps = {
-    selectedCluster: 'Otomatik',
-    setSelectedCluster: vi.fn(),
-    submittingSeating: false,
-    tableStats: [],
-    onSubmit: vi.fn((e) => e.preventDefault()),
-  };
-
-  it('5 küme seçeneği render eder', () => {
-    render(<SeatingStep {...defaultProps} />);
-    expect(screen.getByText(/Beni Otomatik Yerleştir/)).toBeInTheDocument();
-    expect(screen.getByText('A Kümesi')).toBeInTheDocument();
-    expect(screen.getByText('B Kümesi')).toBeInTheDocument();
-    expect(screen.getByText('C Kümesi')).toBeInTheDocument();
-    expect(screen.getByText('D Kümesi')).toBeInTheDocument();
-  });
-
-  it('başvuru onay mesajını gösterir', () => {
-    render(<SeatingStep {...defaultProps} />);
-    expect(screen.getByText('Başvurunuz Onaylanmıştır!')).toBeInTheDocument();
-  });
-
-  it('submit butonunu render eder', () => {
-    render(<SeatingStep {...defaultProps} />);
-    expect(screen.getByText('Küme Tercihimi Kaydet')).toBeInTheDocument();
-  });
-
-  it('submittingSeating true iken "Kaydediliyor..." gösterir', () => {
-    render(<SeatingStep {...defaultProps} submittingSeating={true} />);
-    expect(screen.getByText('Kaydediliyor...')).toBeInTheDocument();
-  });
-
-  it('küme tıklandığında setSelectedCluster çağrılır', () => {
-    const setSelectedCluster = vi.fn();
-    render(<SeatingStep {...defaultProps} setSelectedCluster={setSelectedCluster} />);
-
-    fireEvent.click(screen.getByText('B Kümesi'));
-    expect(setSelectedCluster).toHaveBeenCalledWith('KumeB');
-  });
-
-  it('tableStats varsa istatistik gösterir', () => {
-    const stats = [
-      { cluster: 'KumeA', airline: 'THY', count: 15 },
-      { cluster: 'KumeA', airline: 'PGT', count: 8 },
-    ];
-    render(<SeatingStep {...defaultProps} tableStats={stats} />);
-    expect(screen.getByText(/THY: 15/)).toBeInTheDocument();
-    expect(screen.getByText(/PGT: 8/)).toBeInTheDocument();
-  });
-
-  it('Otomatik kümesinde istatistik göstermez', () => {
-    const stats = [{ cluster: 'Otomatik', airline: 'THY', count: 10 }];
-    render(<SeatingStep {...defaultProps} tableStats={stats} />);
-    expect(screen.queryByText(/THY: 10/)).not.toBeInTheDocument();
-  });
-
-  it('form submit edildiğinde onSubmit çağrılır', () => {
-    const onSubmit = vi.fn((e) => e.preventDefault());
-    render(<SeatingStep {...defaultProps} onSubmit={onSubmit} />);
-
-    fireEvent.click(screen.getByText('Küme Tercihimi Kaydet'));
-    expect(onSubmit).toHaveBeenCalled();
   });
 });

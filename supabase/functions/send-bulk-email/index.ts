@@ -108,6 +108,10 @@ async function resolveAdminEmails(smtp: SmtpConfig): Promise<string[]> {
 
 // ── Fallback templates ────────────────────────
 const FALLBACK: Record<string, { subject: string; body: string }> = {
+  checkin_otp: {
+    subject: 'DPG 2026 Check-in Doğrulama Kodunuz',
+    body: '<h2 style="color:#051424;">Check-in Doğrulama Kodu</h2><p style="color:#333;font-size:15px;line-height:1.6;">Sayın {{name}}, check-in için doğrulama kodunuz aşağıdadır:</p><div style="font-size:32px;font-weight:700;letter-spacing:6px;color:#051424;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 20px;display:inline-block;">{{otp_code}}</div><p style="color:#666;font-size:13px;line-height:1.6;margin-top:16px;">Kod {{expires_minutes}} dakika geçerlidir. Bu isteği siz yapmadıysanız e-postayı dikkate almayın.</p>',
+  },
   smtp_test: {
     subject: 'DPG SMTP Test — {{test_time}}',
     body: '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;"><h2 style="color:#1a365d;">DPG - SMTP Test ✅</h2><p>SMTP bağlantısı başarıyla doğrulandı.</p><p><strong>Sunucu:</strong> {{smtp_host}}:{{smtp_port}}</p><p><strong>Zaman:</strong> {{test_time}}</p></div>',
@@ -155,7 +159,51 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json();
-    const { subject, message, recipients, email_type, extra_data, target_group } = body;
+    const { subject, message, recipients: incomingRecipients, email_type, extra_data, target_group } = body;
+
+    const supabase = getSupabaseAdmin();
+    let recipients = incomingRecipients;
+    let mergedExtraData = { ...(extra_data || {}) };
+
+    if (email_type === 'checkin_otp') {
+      const tcNo = String(mergedExtraData.tc_no || '').trim();
+      if (!tcNo) {
+        return jsonRes({ success: false, message: 'OTP için tc_no zorunludur.' }, 400);
+      }
+
+      const { data: otpData, error: otpError } = await supabase.rpc('issue_checkin_otp_for_email', {
+        p_tc_no: tcNo,
+      });
+
+      if (otpError) {
+        console.error('issue_checkin_otp_for_email error:', otpError);
+        return jsonRes({ success: false, message: 'OTP üretilemedi.', error_type: 'otp_issue_failed' }, 500);
+      }
+
+      if (!otpData?.success) {
+        return jsonRes({
+          success: false,
+          message: otpData?.message || 'OTP isteği başarısız.',
+          error_type: otpData?.error_type || 'otp_request_failed',
+          cooldown_seconds: otpData?.cooldown_seconds || null,
+          masked_email: otpData?.masked_email || null,
+        }, 200);
+      }
+
+      recipients = [
+        {
+          email: otpData.email,
+          name: otpData.full_name || '',
+        },
+      ];
+
+      mergedExtraData = {
+        ...mergedExtraData,
+        otp_code: otpData.otp_code,
+        expires_minutes: String(otpData.expires_minutes || 5),
+        name: otpData.full_name || '',
+      };
+    }
 
     if (!recipients || recipients.length === 0) {
       return jsonRes({ success: false, message: 'Alıcı belirtilmedi.' }, 400);
@@ -177,14 +225,14 @@ Deno.serve(async (req: Request) => {
     if (email_type) {
       const tpl = await getEmailTemplate(email_type);
       if (tpl) {
-        const vars: Record<string, string> = { ...extra_data };
+        const vars: Record<string, string> = { ...mergedExtraData };
         if (recipients[0]?.name && !vars.name) vars.name = recipients[0].name;
         if (recipients[0]?.email && !vars.email) vars.email = recipients[0].email;
         finalSubject = renderTemplate(tpl.subject, vars);
         finalBody = renderTemplate(tpl.body_html, vars);
       } else if (FALLBACK[email_type]) {
         const fb = FALLBACK[email_type];
-        const vars: Record<string, string> = { ...extra_data };
+        const vars: Record<string, string> = { ...mergedExtraData };
         if (!vars.name) vars.name = recipients[0]?.name || '';
         if (!vars.email) vars.email = recipients[0]?.email || '';
         finalSubject = renderTemplate(fb.subject, vars);
@@ -228,7 +276,7 @@ Deno.serve(async (req: Request) => {
       }
 
       for (const toEmail of toEmails) {
-        const recipientVars: Record<string, string> = { ...extra_data, name: recipient.name || '', email: toEmail };
+        const recipientVars: Record<string, string> = { ...mergedExtraData, name: recipient.name || '', email: toEmail };
         const thisSubject = renderTemplate(finalSubject, recipientVars);
         const thisBody = renderTemplate(wrappedHtml, recipientVars);
 
@@ -270,6 +318,7 @@ Deno.serve(async (req: Request) => {
       message: `${successCount} başarılı, ${failCount} başarısız.`,
       sent: successCount,
       failed: failCount,
+      ...(email_type === 'checkin_otp' ? { masked_email: recipients[0]?.email ? String(recipients[0].email).replace(/^(.{2}).*(@.*)$/, '$1***$2') : null } : {}),
       results,
     });
   } catch (err: unknown) {

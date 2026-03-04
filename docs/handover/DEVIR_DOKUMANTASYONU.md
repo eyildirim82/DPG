@@ -2,6 +2,10 @@
 
 Bu doküman, projeyi devralacak outsource ekibin sistemin davranışını, kritik risk noktalarını ve operasyonel süreçleri hızlıca içselleştirmesi için hazırlanmıştır.
 
+## Active vs Archive (Mini)
+
+Tek kaynak tablo: [00-index.md](00-index.md)
+
 ## 1. Genel Bakış ve Kurulum
 
 ### Sistem Özeti
@@ -137,6 +141,8 @@ sequenceDiagram
 
 Detaylı sürüm: [04-test-and-deployment-guide.md](04-test-and-deployment-guide.md)
 
+Check-in + OTP canlı geçiş planı: [05-checkin-otp-rollout-plan.md](05-checkin-otp-rollout-plan.md)
+
 ### QA Protokolü
 - Unit: Validation, hook ve statik component davranışları
 - Integration: RLS/security ve iş kuralı senaryoları
@@ -153,3 +159,45 @@ Bu depoda aktif ESLint/Prettier/Husky dosyaları henüz bulunmuyor. Devir sonras
 - ESLint: React + hooks + import sıralama kuralları
 - Prettier: tek format kaynağı
 - Husky + lint-staged: commit öncesi format + lint + hızlı test
+
+## 6. Başvuru Sonrası Check-in Geçişi
+
+Başvurular kapanışı sonrası devreye alınacak TC + e-posta OTP tabanlı Check-in akışı için operasyonel, teknik ve test odaklı detay plan bu dokümandadır:
+- [05-checkin-otp-rollout-plan.md](05-checkin-otp-rollout-plan.md)
+
+Jira'ya doğrudan aktarılabilir epic/story/task kırılımı:
+- [06-jira-backlog-checkin-otp.md](06-jira-backlog-checkin-otp.md)
+
+Jira CSV import için hazır dosya:
+- [07-jira-import-checkin-otp.csv](07-jira-import-checkin-otp.csv)
+
+Jira proje tipine göre optimize CSV dosyaları:
+- [08-jira-import-company-managed-checkin-otp.csv](08-jira-import-company-managed-checkin-otp.csv)
+- [09-jira-import-team-managed-checkin-otp.csv](09-jira-import-team-managed-checkin-otp.csv)
+
+## 7. Güncel Durum (2026-03-04)
+
+Check-in + OTP + masa seçimi geliştirmelerinin tarihsel durumu (ARŞİV / NOT-IN-USE) bu dokümandadır:
+- [10-checkin-seatmap-status-and-next-steps.md](10-checkin-seatmap-status-and-next-steps.md)
+
+Tarihsel özet:
+- Check-in akışı (TC + e-posta OTP) ve check-in aksiyon RPC'leri tamamlandı.
+- Seatmap dönemi geliştirmeleri arşivlendi ve aktif akıştan çıkarıldı.
+- Aktif modelde check-in tamamlamak için `preferred_people` listesi zorunludur.
+- Legacy teknik borç hard cleanup ile kapatıldı (`table_capacity` kolonu ve `get_checkin_table_occupants` RPC kaldırıldı).
+
+Aktif modelde seatmap kullanım dışıdır; güncel kişi tercihi akışı için:
+- [03-api-and-data-model.md](03-api-and-data-model.md)
+- [04-test-and-deployment-guide.md](04-test-and-deployment-guide.md)
+- [12-checkin-test-guide-local-and-uat.md](12-checkin-test-guide-local-and-uat.md)
+- [15-legacy-seatmap-archive-note.md](15-legacy-seatmap-archive-note.md)
+
+Canlı geçişte adım adım uygulanacak tek sayfa operasyon checklisti:
+- [11-live-cutover-operational-checklist.md](11-live-cutover-operational-checklist.md)
+
+Lokal ve test sunucusunda check-in test rehberi:
+- [12-checkin-test-guide-local-and-uat.md](12-checkin-test-guide-local-and-uat.md)
+
+Seatmap kaldırma ve "kişi tercih listesi" geçişi için Jira iş kırılımı:
+- [13-jira-backlog-seatmap-decommission-and-people-preferences.md](13-jira-backlog-seatmap-decommission-and-people-preferences.md)
+- [14-jira-import-team-managed-seatmap-decommission-and-people-preferences.csv](14-jira-import-team-managed-seatmap-decommission-and-people-preferences.csv)

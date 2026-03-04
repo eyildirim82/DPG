@@ -196,25 +196,18 @@ export default function SubmissionsList() {
         if (!prefStr) return <span className="text-gray-400 italic">Yok</span>;
         try {
             const prefs = JSON.parse(prefStr);
-            if (prefs && prefs.cluster) {
-                const clusterNames = {
-                    'KumeA': 'A Kümesi (Sahne Önü)',
-                    'KumeB': 'B Kümesi (Orta)',
-                    'KumeC': 'C Kümesi (Yan Koridor)',
-                    'KumeD': 'D Kümesi (Arka Loca)'
-                };
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200 mt-1">
-                        {clusterNames[prefs.cluster] || prefs.cluster}
-                    </span>
-                );
-            }
-            if (Array.isArray(prefs) && prefs.length > 0) {
+            const preferredPeople = Array.isArray(prefs?.preferred_people)
+                ? prefs.preferred_people
+                : Array.isArray(prefs)
+                    ? prefs
+                    : [];
+
+            if (preferredPeople.length > 0) {
                 return (
                     <div className="flex flex-wrap gap-1 mt-1">
-                        {prefs.map(p => (
-                            <span key={p.id} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                                {p.full_name}
+                        {preferredPeople.map((person, index) => (
+                            <span key={person?.id || `${person?.full_name || 'kisi'}-${index}`} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                {person.full_name}
                             </span>
                         ))}
                     </div>
@@ -251,8 +244,12 @@ export default function SubmissionsList() {
             let seatingStr = '';
             try {
                 const prefs = JSON.parse(sub.seating_preference);
-                if (prefs && prefs.cluster) seatingStr = prefs.cluster;
-                else if (Array.isArray(prefs)) seatingStr = prefs.map(p => p.full_name).join(', ');
+                const preferredPeople = Array.isArray(prefs?.preferred_people)
+                    ? prefs.preferred_people
+                    : Array.isArray(prefs)
+                        ? prefs
+                        : [];
+                seatingStr = preferredPeople.map(p => p.full_name).join(', ');
             } catch (e) {
                 seatingStr = sub.seating_preference || '';
             }
@@ -273,7 +270,7 @@ export default function SubmissionsList() {
                 'Tahsilat Durumu': sub.payment_status === 'paid' ? 'Tahsil Edildi' : sub.payment_status === 'failed' ? 'Başarısız/İptal' : 'Bekliyor',
                 'Bilet Tipi': sub.ticket_type === 'asil' ? 'Asil' : sub.ticket_type === 'yedek' ? 'Yedek' : 'Bilinmiyor',
                 'Durum': sub.status === 'cancelled' ? 'İptal Edildi' : 'Kayıtlı',
-                'Koltuk Tercihleri': seatingStr
+                'Tercih Edilen Kişiler': seatingStr
             };
         });
 

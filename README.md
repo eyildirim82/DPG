@@ -62,11 +62,20 @@ npm run test:security
 - `/admin/*`: Korumalı yönetim ekranları
 
 ## Mimari ve Devir Dokümanları
+- Active vs Archive özeti için: [Handover Index](docs/handover/00-index.md)
+
 - [Yazılım Devir Dokümanı](docs/handover/DEVIR_DOKUMANTASYONU.md)
+- [Handover Index (Active vs Archive)](docs/handover/00-index.md)
 - [Mimari ve Klasör Yapısı](docs/handover/01-architecture-and-folder-structure.md)
 - [ADR ve AI Mantık İncelemesi](docs/handover/02-adr-and-ai-logic-review.md)
 - [API ve Veri Modeli](docs/handover/03-api-and-data-model.md)
 - [Test ve Deployment Rehberi](docs/handover/04-test-and-deployment-guide.md)
+- [Check-in + OTP Canlı Geçiş Planı](docs/handover/05-checkin-otp-rollout-plan.md)
+- [Check-in + Seatmap Durum ve Sonraki Adımlar](docs/handover/10-checkin-seatmap-status-and-next-steps.md)
+- [Canlı Geçiş Operasyon Checklisti (Tek Sayfa)](docs/handover/11-live-cutover-operational-checklist.md)
+- [Check-in Test Rehberi (Lokal + Test Sunucusu)](docs/handover/12-checkin-test-guide-local-and-uat.md)
+- [Seatmap Decommission Jira Backlog](docs/handover/13-jira-backlog-seatmap-decommission-and-people-preferences.md)
+- [Seatmap Decommission Jira CSV (Team-managed)](docs/handover/14-jira-import-team-managed-seatmap-decommission-and-people-preferences.csv)
 
 ## Teknoloji Yığını
 - Frontend: React 18, Vite, Tailwind CSS

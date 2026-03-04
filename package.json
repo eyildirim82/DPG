@@ -20,6 +20,7 @@
     "test:stress": "node tests/stress/quota-race.test.js --users=200 --wave=50",
     "test:stress:mock": "vitest run tests/stress/quota-race-mock.test.js",
     "test:e2e": "playwright test",
+    "test:e2e:checkin": "playwright test e2e/checkin-flow.spec.js",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:auth": "playwright test e2e/admin-auth.spec.js",
