@@ -16,12 +16,16 @@ vi.mock('lucide-react', () => ({
 }));
 
 // ─── Supabase mock (vi.hoisted) ────────────────
-const { mockFrom, mockRpc } = vi.hoisted(() => {
+const { mockFrom, mockRpc, mockChannel, mockOn, mockSubscribe, mockRemoveChannel } = vi.hoisted(() => {
   const mockRpc = vi.fn();
   const mockSelect = vi.fn();
   const mockNot = vi.fn();
   const mockIn = vi.fn();
   const mockEq = vi.fn();
+  const mockSubscribe = vi.fn(() => ({ topic: 'admin-dashboard-submissions' }));
+  const mockOn = vi.fn(() => ({ subscribe: mockSubscribe }));
+  const mockChannel = vi.fn(() => ({ on: mockOn }));
+  const mockRemoveChannel = vi.fn();
   const mockFrom = vi.fn(() => ({
     select: (...args) => {
       mockSelect(...args);
@@ -32,13 +36,15 @@ const { mockFrom, mockRpc } = vi.hoisted(() => {
       };
     },
   }));
-  return { mockFrom, mockRpc, mockSelect, mockNot, mockIn, mockEq };
+  return { mockFrom, mockRpc, mockSelect, mockNot, mockIn, mockEq, mockChannel, mockOn, mockSubscribe, mockRemoveChannel };
 });
 
 vi.mock('../../lib/supabase', () => ({
   supabase: {
     from: (...args) => mockFrom(...args),
     rpc: (...args) => mockRpc(...args),
+    channel: (...args) => mockChannel(...args),
+    removeChannel: (...args) => mockRemoveChannel(...args),
   },
 }));
 
@@ -168,6 +174,10 @@ describe('Dashboard', () => {
     expect(within(asilYeniCard).getByText('60')).toBeInTheDocument();
     expect(within(yedekEskiCard).getByText('10')).toBeInTheDocument();
     expect(within(yedekYeniCard).getByText('10')).toBeInTheDocument();
+    expect(screen.getByText('Toplam Asil Başvuru')).toBeInTheDocument();
+    expect(screen.getByText('Toplam Yedek Başvuru')).toBeInTheDocument();
+    expect(screen.getByText('160')).toBeInTheDocument();
+    expect(screen.getByText('20')).toBeInTheDocument();
   });
 
   it('supabase.from ve rpc çağrılır', async () => {
@@ -179,5 +189,23 @@ describe('Dashboard', () => {
 
     expect(mockFrom).toHaveBeenCalledWith('cf_whitelist');
     expect(mockFrom).toHaveBeenCalledWith('cf_submissions');
+    expect(mockChannel).toHaveBeenCalledWith('admin-dashboard-submissions');
+    expect(mockOn).toHaveBeenCalledWith(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'cf_submissions' },
+      expect.any(Function)
+    );
+    expect(mockSubscribe).toHaveBeenCalled();
+  });
+
+  it('unmount sırasında realtime channel temizlenir', async () => {
+    const { unmount } = render(<Dashboard />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Dashboard Özet')).toBeInTheDocument();
+    });
+
+    unmount();
+    expect(mockRemoveChannel).toHaveBeenCalledTimes(1);
   });
 });

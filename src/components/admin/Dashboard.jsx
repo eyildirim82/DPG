@@ -17,12 +17,26 @@ export default function Dashboard() {
         asilNewReserved: 0,
         yedekReturningReserved: 0,
         yedekNewReserved: 0,
+        asilTotalReserved: 0,
+        yedekTotalReserved: 0,
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchStats = async () => {
-            setLoading(true);
+        let isActive = true;
+
+        const fetchStats = async ({ showLoading = false } = {}) => {
+            if (!supabase) {
+                if (isActive) {
+                    setLoading(false);
+                }
+                return;
+            }
+
+            if (showLoading && isActive) {
+                setLoading(true);
+            }
+
             try {
                 const [
                     { count: whitelistTotal },
@@ -38,6 +52,15 @@ export default function Dashboard() {
                     supabase.rpc('get_ticket_stats')
                 ]);
 
+                const asilReturningReserved = quotaData?.asil_returning_reserved || 0;
+                const asilNewReserved = quotaData?.asil_new_reserved || 0;
+                const yedekReturningReserved = quotaData?.yedek_returning_reserved || 0;
+                const yedekNewReserved = quotaData?.yedek_new_reserved || 0;
+
+                if (!isActive) {
+                    return;
+                }
+
                 setStats({
                     whitelistTotal: whitelistTotal || 0,
                     submissionsTotal: submissionsTotal || 0,
@@ -47,20 +70,47 @@ export default function Dashboard() {
                     quotaAsil: quotaData?.asil_capacity || 700,
                     quotaTotal: quotaData?.total_capacity || 1500,
                     asilReturningCapacity: quotaData?.asil_returning_capacity || 500,
-                    asilReturningReserved: quotaData?.asil_returning_reserved || 0,
+                    asilReturningReserved,
                     asilNewCapacity: quotaData?.asil_new_capacity || 200,
-                    asilNewReserved: quotaData?.asil_new_reserved || 0,
-                    yedekReturningReserved: quotaData?.yedek_returning_reserved || 0,
-                    yedekNewReserved: quotaData?.yedek_new_reserved || 0,
+                    asilNewReserved,
+                    yedekReturningReserved,
+                    yedekNewReserved,
+                    asilTotalReserved: asilReturningReserved + asilNewReserved,
+                    yedekTotalReserved: yedekReturningReserved + yedekNewReserved,
                 });
             } catch (error) {
-                console.error("Error fetching dashboard stats:", error);
+                console.error('Error fetching dashboard stats:', error);
             } finally {
-                setLoading(false);
+                if (showLoading && isActive) {
+                    setLoading(false);
+                }
             }
         };
 
-        fetchStats();
+        fetchStats({ showLoading: true });
+
+        const submissionsChannel = supabase
+            ?.channel('admin-dashboard-submissions')
+            ?.on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'cf_submissions' },
+                () => {
+                    fetchStats();
+                }
+            )
+            ?.subscribe();
+
+        const refreshIntervalId = window.setInterval(() => {
+            fetchStats();
+        }, 60000);
+
+        return () => {
+            isActive = false;
+            window.clearInterval(refreshIntervalId);
+            if (submissionsChannel && supabase?.removeChannel) {
+                supabase.removeChannel(submissionsChannel);
+            }
+        };
     }, []);
 
     const statCards = [
@@ -141,6 +191,17 @@ export default function Dashboard() {
                             <div className="w-full bg-slate-950/50 rounded-full h-2 mt-3">
                                 <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${Math.min(100, (stats.reservedTotal / stats.quotaTotal) * 100)}%` }}></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                            <p className="text-sm font-medium text-gray-500">Toplam Asil Başvuru</p>
+                            <p className="text-3xl font-bold text-dpg-navy mt-1">{stats.asilTotalReserved}</p>
+                        </div>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                            <p className="text-sm font-medium text-gray-500">Toplam Yedek Başvuru</p>
+                            <p className="text-3xl font-bold text-dpg-navy mt-1">{stats.yedekTotalReserved}</p>
                         </div>
                     </div>
 
